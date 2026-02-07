@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div style="display: flex; height: calc(100vh - 70px);">
+    <div style="width: 350px; background: white; border-right: 1px solid #ddd; padding: 20px; overflow-y: auto;">
+        <h3 style="color: #5e72e4; margin-bottom: 5px;">🚀 Tối ưu Lộ trình</h3>
+        <p style="font-size: 13px; color: #888;">Thuật toán: Nearest Neighbor (TSP)</p>
+        <hr>
+        
+        <button onclick="optimizeRoute()" style="width: 100%; padding: 10px; background: #2dce89; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-bottom: 20px;">
+            ⚡ Chạy Tối Ưu Hóa Ngay
+        </button>
+
+        <div id="route-list">
+            <p style="text-align: center; color: #888; margin-top: 50px;">
+                Nhấn nút bên trên để hệ thống <br>tính toán đường đi ngắn nhất.
+            </p>
+        </div>
+    </div>
+
+    <div style="flex: 1; position: relative;">
+        <div id="map" style="width: 100%; height: 100%;"></div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
+<script>
+    // 1. Dữ liệu đầu vào (Từ Django)
+    var warehouse = {lat: 10.7721, lng: 106.6983, name: "KHO TRUNG TÂM"};
+    var customers = [
+        {% for dh in ds_don %}
+        {
+            id: "{{ dh.ma_don }}",
+            name: "{{ dh.ten_nguoi_nhan }}",
+            lat: parseFloat("{{ dh.lat_khach }}".replace(',', '.')),
+            lng: parseFloat("{{ dh.lng_khach }}".replace(',', '.')),
+            address: "{{ dh.dia_chi_nguoi_nhan }}"
+        },
+        {% endfor %}
+    ];
+
+    // 2. Khởi tạo bản đồ
+    var map = L.map('map').setView([warehouse.lat, warehouse.lng], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© Logistics Pro' }).addTo(map);
+
+    // Icon
+    var warehouseIcon = L.icon({iconUrl: 'https://cdn-icons-png.flaticon.com/512/2821/2821861.png', iconSize: [40, 40], iconAnchor: [20, 40]});
+    var customerIcon = L.icon({iconUrl: 'https://cdn-icons-png.flaticon.com/512/3097/3097144.png', iconSize: [35, 35], iconAnchor: [17, 35]});
+
+    // Vẽ kho trước
+    L.marker([warehouse.lat, warehouse.lng], {icon: warehouseIcon}).addTo(map).bindPopup("<b>🚩 KHO XUẤT PHÁT</b>");
+
+    // Biến lưu control đường đi
+    var routingControl = null;
+
+    // --- THUẬT TOÁN TỐI ƯU HÓA (NEAREST NEIGHBOR) ---
+    function optimizeRoute() {
+        // Nếu không có khách thì thôi
+        if (customers.length === 0) { alert("Không có đơn hàng để tối ưu!"); return; }
+
+        var unvisited = [...customers]; // Copy danh sách khách
+        var currentLocation = warehouse; // Bắt đầu từ kho
+        var optimizedPath = [L.latLng(warehouse.lat, warehouse.lng)]; // Danh sách điểm đi
+        var htmlList = "";
+
+        // Thuật toán: Tìm điểm gần nhất tiếp theo
+        while (unvisited.length > 0) {
+            var nearestIndex = -1;
+            var minDistance = Infinity;
+
+            for (var i = 0; i < unvisited.length; i++) {
+                // Tính khoảng cách chim bay (Euclidean)
+                var d = Math.sqrt(
+                    Math.pow(unvisited[i].lat - currentLocation.lat, 2) + 
+                    Math.pow(unvisited[i].lng - currentLocation.lng, 2)
+                );
+
+                if (d < minDistance) {
+                    minDistance = d;
+                    nearestIndex = i;
+                }
+            }
+
+            // Đã tìm thấy khách gần nhất
+            var nextStop = unvisited[nearestIndex];
+            
+            // Thêm vào lộ trình
+            optimizedPath.push(L.latLng(nextStop.lat, nextStop.lng));
+            
+            // Thêm vào danh sách hiển thị HTML
+            htmlList += `
+                <div style="padding: 10px; border-left: 3px solid #5e72e4; background: #f8f9fe; margin-bottom: 10px;">
+                    <b style="color:#333;">${optimizedPath.length - 1}. ${nextStop.name}</b><br>
+                    <small>${nextStop.address}</small>
+                </div>
+            `;
+
+            // Cập nhật điểm hiện tại là điểm vừa đến
+            currentLocation = nextStop;
+            // Xóa khỏi danh sách chưa đi
+            unvisited.splice(nearestIndex, 1);
+        }
+
+        // Cập nhật giao diện bên trái
+        document.getElementById('route-list').innerHTML = htmlList + `<div style="text-align:center; color:green; font-weight:bold;">🏁 HOÀN THÀNH LỘ TRÌNH</div>`;
+
+        // --- VẼ ĐƯỜNG ĐI NỐI CÁC ĐIỂM ---
+        if (routingControl) map.removeControl(routingControl); // Xóa đường cũ nếu có
+
+        routingControl = L.Routing.control({
+            waypoints: optimizedPath,
+            routeWhileDragging: false,
+            show: false, // Tắt bảng chỉ dẫn mặc định (vì mình tự làm bên trái rồi)
+            createMarker: function(i, wp, nWps) {
+                if (i === 0) return null; // Đã vẽ kho rồi
+                // Tìm thông tin khách dựa trên tọa độ
+                return L.marker(wp.latLng, {icon: customerIcon}).bindPopup(`Điểm dừng thứ ${i}`);
+            }
+        }).addTo(map);
+    }
+</script>
+{% endblock %}

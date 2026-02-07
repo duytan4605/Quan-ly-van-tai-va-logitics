@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div style="padding: 30px; max-width: 1200px; margin: 0 auto;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="color: #32325d; margin: 0;">🏭 Quản lý Kho Hàng</h2>
+        <a href="{% url 'core:them_kho' %}" style="background: linear-gradient(87deg, #2dce89 0, #2dcecc 100%) !important; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; box-shadow: 0 4px 6px rgba(50,50,93,.11);">
+            <i class="fa-solid fa-plus"></i> Thêm Kho Mới
+        </a>
+    </div>
+
+    <form method="GET" style="display: flex; gap: 10px; margin-bottom: 20px; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+        
+        <div style="flex: 1; display: flex; align-items: center; border: 1px solid #ddd; border-radius: 5px; padding: 0 10px;">
+            <i class="fa-solid fa-magnifying-glass" style="color: #888;"></i>
+            <input type="text" name="q" placeholder="Nhập tên kho cần tìm..." value="{{ request.GET.q|default:'' }}" 
+                   style="border: none; outline: none; padding: 10px; width: 100%;">
+        </div>
+
+        <select name="sort" onchange="this.form.submit()" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; cursor: pointer;">
+            <option value="">-- Sắp xếp --</option>
+            <option value="ten_az" {% if request.GET.sort == 'ten_az' %}selected{% endif %}>🔤 Tên A-Z</option>
+        </select>
+
+        <button type="submit" style="background: #5e72e4; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+            Tìm kiếm
+        </button>
+        
+        <a href="{% url 'core:quan_ly_kho' %}" title="Xóa bộ lọc" style="display: flex; align-items: center; justify-content: center; text-decoration: none; color: #888; padding: 0 15px; border: 1px solid #ddd; border-radius: 5px;">
+            <i class="fa-solid fa-rotate-left"></i>
+        </a>
+    </form>
+
+    <div style="background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead style="background: #f6f9fc; color: #8898aa; font-size: 12px; text-transform: uppercase;">
+                <tr>
+                    <th style="padding: 15px; text-align: left;">Tên Kho</th>
+                    <th style="padding: 15px; text-align: left;">Địa chỉ</th>
+                    <th style="padding: 15px; text-align: center;">Tọa độ (Lat, Lng)</th>
+                    <th style="padding: 15px; text-align: center;">Hành động</th>
+                </tr>
+            </thead>
+            <tbody style="font-size: 14px; color: #525f7f;">
+                {% for kho in ds_kho %}
+                <tr style="border-bottom: 1px solid #eee; transition: background 0.2s;">
+                    <td style="padding: 15px; font-weight: bold; color: #32325d;">
+                        <i class="fa-solid fa-warehouse" style="color: #8965e0; margin-right: 5px;"></i> {{ kho.ten_kho }}
+                    </td>
+
+                    <td style="padding: 15px;">
+                        {{ kho.dia_chi }}
+                    </td>
+
+                    <td style="padding: 15px; text-align: center;">
+                        <span style="background: #f6f9fc; border: 1px solid #e9ecef; padding: 5px 10px; border-radius: 5px; font-family: monospace; color: #525f7f;">
+                            {{ kho.lat }}, {{ kho.lng }}
+                        </span>
+                    </td>
+
+                    <td style="padding: 15px; text-align: center;">
+                        <a href="{% url 'core:sua_kho' kho.id %}" title="Sửa kho" style="color: #fb6340; margin-right: 15px; font-size: 16px;">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+                        <a href="{% url 'core:xoa_kho' kho.id %}" onclick="return confirm('⚠️ Cảnh báo: Xóa kho hàng có thể ảnh hưởng đến các đơn hàng đang xuất phát tại đây!\nBạn chắc chắn muốn xóa?')" title="Xóa kho" style="color: #f5365c; font-size: 16px;">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 40px; color: #888;">
+                        <i class="fa-solid fa-city" style="font-size: 30px; margin-bottom: 10px; display: block;"></i>
+                        Không tìm thấy kho hàng nào!
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    /* Hiệu ứng hover dòng */
+    tbody tr:hover {
+        background-color: #f8f9fe;
+    }
+    td a:hover {
+        display: inline-block;
+        transform: scale(1.2);
+    }
+</style>
+{% endblock %}

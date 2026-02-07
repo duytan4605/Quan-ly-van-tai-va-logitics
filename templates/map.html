@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    body { font-family: 'Poppins', sans-serif; background-color: #f8f9fe; }
+    
+    .map-container-wrapper {
+        display: flex; gap: 20px; max-width: 1400px; margin: 20px auto; padding: 0 20px;
+        height: 85vh; /* Chiều cao gần full màn hình */
+    }
+
+    /* Cột bên trái: Bản đồ */
+    .map-section {
+        flex: 3; background: white; border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; position: relative;
+    }
+    #map { width: 100%; height: 100%; }
+
+    /* Cột bên phải: Thông tin */
+    .info-section {
+        flex: 1; display: flex; flex-direction: column; gap: 20px;
+    }
+
+    .info-card {
+        background: white; border-radius: 15px; padding: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    .order-header h2 { font-size: 24px; margin: 0; color: #32325d; }
+    .order-badge { 
+        background: #e0f2fe; color: #0284c7; padding: 5px 12px; 
+        border-radius: 5px; font-size: 12px; font-weight: bold; margin-top: 5px; display: inline-block;
+    }
+
+    .route-info { margin-top: 20px; border-left: 2px dashed #ddd; margin-left: 10px; padding-left: 20px; }
+    .route-point { position: relative; margin-bottom: 25px; }
+    .route-point::before {
+        content: ''; position: absolute; left: -26px; top: 5px;
+        width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 2px #ddd;
+    }
+    .point-start::before { background: #28a745; box-shadow: 0 0 0 2px #28a745; }
+    .point-end::before { background: #dc3545; box-shadow: 0 0 0 2px #dc3545; }
+
+    .price-box {
+        background: linear-gradient(135deg, #f6f9fc 0%, #eef2f7 100%);
+        border-radius: 12px; padding: 20px; text-align: center; border: 1px solid #e9ecef;
+    }
+    .total-price { font-size: 28px; font-weight: 700; color: #2dce89; margin: 10px 0 5px 0; }
+    
+    .btn-back {
+        display: block; width: 100%; padding: 12px; text-align: center;
+        background: white; border: 1px solid #ddd; border-radius: 10px;
+        color: #555; font-weight: 600; text-decoration: none; transition: 0.3s;
+    }
+    .btn-back:hover { background: #f8f9fa; color: #333; }
+</style>
+
+<div class="map-container-wrapper">
+    <div class="map-section">
+        <div id="map"></div>
+    </div>
+
+    <div class="info-section">
+        <div class="info-card">
+            <div class="order-header">
+                <h2>#{{ dh.ma_don }}</h2>
+                <span class="order-badge">{{ dh.trang_thai }}</span>
+            </div>
+            
+            <div class="route-info">
+                <div class="route-point point-start">
+                    <small style="color: #888;">Điểm xuất phát</small>
+                    <div style="font-weight: 600;">Kho Trung Tâm (Q.1)</div>
+                </div>
+                <div class="route-point point-end">
+                    <small style="color: #888;">Người nhận</small>
+                    <div style="font-weight: 600;">{{ dh.ten_nguoi_nhan }}</div>
+                    <div style="font-size: 13px; color: #666;"><i class="fa-solid fa-location-dot"></i> {{ dh.dia_chi_nguoi_nhan }}</div>
+                    <div style="font-size: 13px; color: #666; margin-top: 3px;"><i class="fa-solid fa-phone"></i> {{ dh.sdt_nguoi_nhan }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <h4 style="margin-top: 0; color: #555;">💰 Chi phí ước tính</h4>
+            <div class="price-box">
+                <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 5px;">
+                    <span>Khoảng cách:</span>
+                    <strong id="distance">...</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 14px;">
+                    <span>Thời gian (dự kiến):</span>
+                    <strong id="duration">...</strong>
+                </div>
+                <hr style="border-top: 1px dashed #ccc; margin: 15px 0;">
+                <div style="font-size: 13px; color: #888;">Tổng phí ship</div>
+                <div class="total-price" id="shipping-fee">0 VNĐ</div>
+            </div>
+        </div>
+
+        <a href="{% url 'core:home' %}" class="btn-back">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
+        </a>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
+<script>
+    var startLat = 10.7721, startLng = 106.6983;
+
+    // Lấy dữ liệu và xử lý dấu phẩy
+    var latString = "{{ dh.lat_khach }}"; 
+    var lngString = "{{ dh.lng_khach }}";
+    var endLat = parseFloat(latString.replace(',', '.'));
+    var endLng = parseFloat(lngString.replace(',', '.'));
+
+    // Fallback nếu lỗi
+    if (isNaN(endLat) || isNaN(endLng) || endLat === 0) {
+        endLat = 10.80; endLng = 106.70;
+    }
+
+    // Init Map
+    var map = L.map('map', {zoomControl: false}).setView([startLat, startLng], 13);
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // Routing
+    var control = L.Routing.control({
+        waypoints: [ L.latLng(startLat, startLng), L.latLng(endLat, endLng) ],
+        routeWhileDragging: false,
+        show: false,
+        lineOptions: { styles: [{color: '#5e72e4', opacity: 0.8, weight: 6}] },
+        createMarker: function(i, wp, nWps) {
+            if (i === 0) {
+                return L.marker(wp.latLng).bindPopup("<b>🏭 Kho Xuất Phát</b>");
+            } else {
+                return L.marker(wp.latLng).bindPopup("<b>👤 {{ dh.ten_nguoi_nhan }}</b><br>{{ dh.dia_chi_nguoi_nhan }}");
+            }
+        }
+    }).addTo(map);
+
+    // --- PHẦN TÍNH TOÁN (Logic mới: Giá mở cửa + Giá theo Km) ---
+    control.on('routesfound', function(e) {
+        var routes = e.routes;
+        var summary = routes[0].summary;
+
+        // 1. Lấy số KM (chính xác 1 số lẻ)
+        var distanceKm = parseFloat((summary.totalDistance / 1000).toFixed(1));
+        
+        // 2. Tính Thời gian (Nhân 1.5 lần để bù trừ kẹt xe)
+        var realTimeMinutes = Math.round((summary.totalTime / 60) * 1.5);
+
+        // 3. TÍNH TIỀN (Logic Grab/AhaMove)
+        var finalPrice = 0;
+        var basePrice = 15000; // Giá mở cửa (2km đầu)
+        var nextPrice = 5500;  // Giá các km tiếp theo (Rẻ hơn)
+
+        if (distanceKm <= 2) {
+            finalPrice = basePrice;
+        } else {
+            // Giá = 15k + (Số km dư ra * 5.5k)
+            finalPrice = basePrice + ((distanceKm - 2) * nextPrice);
+        }
+
+        // Làm tròn số tiền cho đẹp (VD: 63.450 -> 63.000)
+        var roundedPrice = Math.round(finalPrice / 1000) * 1000;
+
+        // Hiển thị ra màn hình
+        document.getElementById('distance').innerText = distanceKm + " km";
+        document.getElementById('duration').innerText = realTimeMinutes + " phút";
+        document.getElementById('shipping-fee').innerText = roundedPrice.toLocaleString('vi-VN') + " đ";
+    });
+</script>
+{% endblock %}

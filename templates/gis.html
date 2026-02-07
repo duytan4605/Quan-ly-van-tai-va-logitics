@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Bố cục Full màn hình */
+    .gis-wrapper { display: flex; height: calc(100vh - 70px); }
+
+    /* Sidebar danh sách */
+    .sidebar-list {
+        width: 350px; background: white; 
+        border-left: 1px solid #ddd; overflow-y: auto;
+        box-shadow: -2px 0 10px rgba(0,0,0,0.05); z-index: 2; display: flex; flex-direction: column;
+    }
+
+    .sidebar-header {
+        padding: 20px; border-bottom: 1px solid #eee; background: #fff;
+    }
+
+    /* Style cho ô chọn bộ lọc */
+    .filter-select {
+        width: 100%; padding: 10px; margin-top: 10px;
+        border: 1px solid #ddd; border-radius: 6px;
+        font-family: 'Poppins', sans-serif; font-size: 14px;
+        outline: none; cursor: pointer;
+    }
+    .filter-select:focus { border-color: #5e72e4; }
+    
+    .vehicle-list-container { flex: 1; overflow-y: auto; }
+
+    .vehicle-item {
+        padding: 15px 20px; border-bottom: 1px solid #f4f4f4; cursor: pointer;
+        transition: 0.2s; display: flex; align-items: center; gap: 15px;
+    }
+    .vehicle-item:hover { background-color: #f8f9fe; }
+    .vehicle-item.hidden { display: none; } /* Class để ẩn khi lọc */
+
+    .vehicle-icon {
+        width: 40px; height: 40px; background: #e0f2fe; color: #0284c7;
+        border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        font-size: 18px;
+    }
+
+    /* Bản đồ */
+    .map-full { flex: 1; position: relative; }
+    #map { width: 100%; height: 100%; }
+
+    /* Custom Popup */
+    .leaflet-popup-content-wrapper { border-radius: 10px; padding: 0; }
+    .leaflet-popup-content { margin: 0; width: 280px !important; }
+    
+    .popup-header {
+        background: #5e72e4; color: white; padding: 10px 15px;
+        border-radius: 10px 10px 0 0; font-weight: bold;
+    }
+    .popup-body { padding: 15px; }
+    .btn-detail {
+        display: block; width: 100%; padding: 8px; margin-top: 10px;
+        background: #f4f6f9; color: #333; text-align: center;
+        text-decoration: none; border-radius: 5px; font-weight: 500; font-size: 12px;
+    }
+    .btn-detail:hover { background: #333; color: white; }
+</style>
+
+<div class="gis-wrapper">
+    <div class="map-full">
+        <div id="map"></div>
+        
+        <div style="position: absolute; top: 20px; left: 20px; z-index: 999; background: white; padding: 10px 15px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+            <h4 style="margin: 0 0 5px 0;">🌏 Bản đồ Hoạt động</h4>
+            <div style="font-size: 13px; color: #666;">
+                <span style="display: inline-block; width: 10px; height: 10px; background: #2dce89; border-radius: 50%;"></span>
+                Hệ thống giám sát Real-time
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar-list">
+        <div class="sidebar-header">
+            <h3 style="color: #32325d; margin-bottom: 5px;">Danh sách xe</h3>
+            
+            <select class="filter-select" id="vehicleFilter" onchange="filterVehicles(this.value)">
+                <option value="all">🚛 Tất cả phương tiện</option>
+                <option value="Xe máy">🛵 Xe máy</option>
+                <option value="Xe tải">🚚 Xe tải</option>
+                <option value="Xe bán tải">🛻 Xe bán tải</option>
+            </select>
+        </div>
+
+        <div class="vehicle-list-container">
+            {% for dh in ds_don %}
+            <div class="vehicle-item" 
+                 data-type="{{ dh.tai_xe.loai_xe }}" 
+                 data-lat="{{ dh.lat_khach }}" 
+                 data-lng="{{ dh.lng_khach }}"
+                 onclick="zoomToCar(this)">
+                
+                <div class="vehicle-icon">
+                    {% if dh.tai_xe.loai_xe == "Xe máy" %}
+                        <i class="fa-solid fa-motorcycle"></i>
+                    {% else %}
+                        <i class="fa-solid fa-truck"></i>
+                    {% endif %}
+                </div>
+                <div>
+                    <div style="font-weight: 600; color: #333;">{{ dh.ma_don }}</div>
+                    <div style="font-size: 12px; color: #555; font-weight: bold;">
+                        {{ dh.tai_xe.ten_tai_xe }} ({{ dh.tai_xe.loai_xe }})
+                    </div>
+                    <div style="font-size: 11px; color: #888;">Khách: {{ dh.ten_nguoi_nhan }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    // 1. Khởi tạo bản đồ
+    var map = L.map('map', {zoomControl: false}).setView([10.7769, 106.7009], 12);
+    L.control.zoom({ position: 'topright' }).addTo(map);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© Logistics Pro'
+    }).addTo(map);
+
+    // 2. Định nghĩa Icon
+    var truckIcon = L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/741/741407.png', // Icon Xe tải
+        iconSize: [38, 38], iconAnchor: [19, 38], popupAnchor: [0, -38]
+    });
+
+    var bikeIcon = L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/3097/3097144.png', // Icon Xe máy
+        iconSize: [38, 38], iconAnchor: [19, 38], popupAnchor: [0, -38]
+    });
+
+    // 3. Render Marker từ dữ liệu Django
+    var markers = []; 
+
+    {% for dh in ds_don %}
+        var latStr = "{{ dh.lat_khach }}";
+        var lngStr = "{{ dh.lng_khach }}";
+        // Lấy chuỗi loại xe để hiển thị trong popup
+        var vehicleType = "{{ dh.tai_xe.loai_xe }}"; 
+
+        var lat = parseFloat(latStr.replace(',', '.'));
+        var lng = parseFloat(lngStr.replace(',', '.'));
+
+        // --- 👇 ĐOẠN QUAN TRỌNG ĐÃ SỬA 👇 ---
+        // Sử dụng Django Template để gán icon ngay từ Server
+        // Không dùng JS để so sánh chuỗi nữa (tránh lỗi tiếng Việt)
+        var chosenIcon;
+        {% if dh.tai_xe.loai_xe == "Xe máy" %}
+            chosenIcon = bikeIcon;
+        {% else %}
+            chosenIcon = truckIcon;
+        {% endif %}
+        // ------------------------------------
+
+        if (!isNaN(lat) && !isNaN(lng)) {
+            var marker = L.marker([lat, lng], {icon: chosenIcon}).addTo(map);
+            
+            // Popup Content
+            var popupContent = `
+                <div class="popup-header">
+                    <i class="fa-solid fa-user-tag"></i> {{ dh.tai_xe.ten_tai_xe }}
+                </div>
+                <div class="popup-body">
+                    <p style="margin:0 0 5px 0;"><b>Phương tiện:</b> ${vehicleType}</p>
+                    <p style="margin:0 0 5px 0;"><b>Đơn hàng:</b> {{ dh.ma_don }}</p>
+                    <p style="margin:0 0 5px 0; font-size:12px; color:#555;">
+                        <i class="fa-solid fa-location-dot"></i> {{ dh.dia_chi_nguoi_nhan }}
+                    </p>
+                    <a href="{% url 'core:chi_tiet' dh.ma_don %}" class="btn-detail">Xem chi tiết ➝</a>
+                </div>
+            `;
+            
+            marker.bindPopup(popupContent);
+            
+            // Lưu marker vào mảng kèm theo loại xe để lọc
+            markers.push({
+                lat: lat, 
+                lng: lng, 
+                type: vehicleType, 
+                m: marker
+            });
+        }
+    {% endfor %}
+
+    // 4. Hàm lọc phương tiện (Chạy khi đổi dropdown)
+    function filterVehicles(selectedType) {
+        // A. Lọc trên bản đồ
+        markers.forEach(item => {
+            if (selectedType === 'all' || item.type === selectedType) {
+                if (!map.hasLayer(item.m)) item.m.addTo(map); // Hiện lại
+            } else {
+                if (map.hasLayer(item.m)) map.removeLayer(item.m); // Ẩn đi
+            }
+        });
+
+        // B. Lọc danh sách bên phải
+        var items = document.querySelectorAll('.vehicle-item');
+        items.forEach(div => {
+            var type = div.getAttribute('data-type');
+            if (selectedType === 'all' || type === selectedType) {
+                div.style.display = 'flex';
+            } else {
+                div.style.display = 'none';
+            }
+        });
+    }
+
+    // 5. Hàm Zoom khi click vào danh sách
+    function zoomToCar(element) {
+        var lat = parseFloat(element.getAttribute('data-lat').replace(',', '.'));
+        var lng = parseFloat(element.getAttribute('data-lng').replace(',', '.'));
+        
+        if (!isNaN(lat) && !isNaN(lng)) {
+            map.flyTo([lat, lng], 16, { duration: 1.5 });
+            
+            // Mở popup tương ứng
+            markers.forEach(item => {
+                if(item.lat === lat && item.lng === lng) {
+                    if (map.hasLayer(item.m)) { // Chỉ mở nếu marker đang hiện
+                        setTimeout(() => item.m.openPopup(), 1500);
+                    }
+                }
+            });
+        }
+    }
+</script>
+{% endblock %}

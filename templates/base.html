@@ -1,0 +1,130 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Logistics Pro</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Reset CSS */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+
+        /* --- NAVBAR STYLING --- */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            height: 70px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 3%; /* Thu nhỏ padding chút để đủ chỗ cho nhiều nút */
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border-bottom: 1px solid #eee;
+        }
+
+        /* Logo */
+        .nav-brand {
+            font-size: 22px; font-weight: 700; color: #333;
+            text-decoration: none; display: flex; align-items: center; gap: 10px;
+            margin-right: 20px;
+        }
+        .nav-brand i { color: #5e72e4; font-size: 26px; }
+
+        /* Menu Links */
+        .nav-links {
+            display: flex; gap: 20px; list-style: none; align-items: center;
+        }
+
+        .nav-item a {
+            text-decoration: none; color: #525f7f;
+            font-weight: 500; font-size: 14px;
+            transition: all 0.3s ease; display: flex; align-items: center; gap: 6px;
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+
+        .nav-item a:hover { 
+            color: #5e72e4; 
+            background-color: #f6f9fc;
+            transform: translateY(-2px); 
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center; padding: 20px; color: #8898aa; font-size: 13px; margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="{% url 'core:home' %}" class="nav-brand">
+            <i class="fa-solid fa-truck-fast"></i>
+            Logistics<span style="color: #5e72e4;">Pro</span>
+        </a>
+
+        <ul class="nav-links">
+            <li class="nav-item">
+                <a href="{% url 'core:home' %}">
+                    <i class="fa-solid fa-house"></i> Trang chủ
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="{% url 'core:ban_do_chung' %}">
+                    <i class="fa-solid fa-earth-americas"></i> Bản đồ GIS
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'core:toi_uu' %}">
+                    <i class="fa-solid fa-wand-magic-sparkles" style="color: #fb6340;"></i> Tối ưu
+                </a>
+            </li>
+
+            <li style="border-left: 2px solid #eee; height: 30px;"></li>
+
+            <li class="nav-item">
+                <a href="{% url 'core:quan_ly_kho' %}">
+                    <i class="fa-solid fa-warehouse" style="color: #8965e0;"></i> Quản Lý Kho
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'core:quan_ly_don_hang' %}">
+                    <i class="fa-solid fa-box-open" style="color: #ffd600;"></i> Quản Lý Đơn
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'core:quan_ly_tai_xe' %}">
+                    <i class="fa-solid fa-users-gear" style="color: #11cdef;"></i> Quản Lý Tài Xế
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <main style="min-height: 80vh;">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer class="footer">
+        &copy; 2026 Logistics Management System. Powered by Django & Leaflet GIS.
+    </footer>
+
+</body>
+</html>

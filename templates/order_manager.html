@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div style="padding: 30px; max-width: 1200px; margin: 0 auto;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="color: #32325d; margin: 0;">📦 Quản lý Đơn Hàng</h2>
+        <a href="{% url 'core:them_don_hang' %}" style="background: linear-gradient(87deg, #2dce89 0, #2dcecc 100%) !important; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; box-shadow: 0 4px 6px rgba(50,50,93,.11);">
+            <i class="fa-solid fa-plus"></i> Tạo Đơn Mới
+        </a>
+    </div>
+
+    <form method="GET" style="display: flex; gap: 10px; margin-bottom: 20px; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+        
+        <div style="flex: 1; display: flex; align-items: center; border: 1px solid #ddd; border-radius: 5px; padding: 0 10px;">
+            <i class="fa-solid fa-magnifying-glass" style="color: #888;"></i>
+            <input type="text" name="q" placeholder="Nhập Mã đơn hoặc Tên khách..." value="{{ request.GET.q|default:'' }}" 
+                   style="border: none; outline: none; padding: 10px; width: 100%;">
+        </div>
+
+        <select name="sort" onchange="this.form.submit()" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; cursor: pointer;">
+            <option value="">-- Sắp xếp --</option>
+            <option value="moi_nhat" {% if request.GET.sort == 'moi_nhat' %}selected{% endif %}>📅 Mới nhất</option>
+            <option value="trang_thai" {% if request.GET.sort == 'trang_thai' %}selected{% endif %}>📦 Theo Trạng thái</option>
+        </select>
+
+        <button type="submit" style="background: #5e72e4; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+            Tìm kiếm
+        </button>
+        
+        <a href="{% url 'core:quan_ly_don_hang' %}" title="Xóa bộ lọc" style="display: flex; align-items: center; justify-content: center; text-decoration: none; color: #888; padding: 0 15px; border: 1px solid #ddd; border-radius: 5px;">
+            <i class="fa-solid fa-rotate-left"></i>
+        </a>
+    </form>
+
+    <div style="background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead style="background: #f6f9fc; color: #8898aa; font-size: 12px; text-transform: uppercase;">
+                <tr>
+                    <th style="padding: 15px; text-align: left;">Mã Đơn</th>
+                    <th style="padding: 15px; text-align: left;">Khách Hàng</th>
+                    <th style="padding: 15px; text-align: left;">Tài Xế Phụ Trách</th>
+                    <th style="padding: 15px; text-align: center;">Trạng Thái</th>
+                    <th style="padding: 15px; text-align: center;">Hành động</th>
+                </tr>
+            </thead>
+            <tbody style="font-size: 14px; color: #525f7f;">
+                {% for don in ds_don %}
+                <tr style="border-bottom: 1px solid #eee; transition: background 0.2s;">
+                    <td style="padding: 15px; font-weight: bold; color: #5e72e4;">
+                        <a href="{% url 'core:chi_tiet' don.ma_don %}" style="text-decoration: none; color: inherit;">
+                            <i class="fa-solid fa-hashtag"></i> {{ don.ma_don }}
+                        </a>
+                    </td>
+
+                    <td style="padding: 15px;">
+                        <div style="font-weight: 600; color: #32325d;">{{ don.ten_nguoi_nhan }}</div>
+                        <div style="font-size: 12px; color: #888;"><i class="fa-solid fa-location-dot"></i> {{ don.dia_chi_nguoi_nhan }}</div>
+                    </td>
+
+                    <td style="padding: 15px;">
+                        {% if don.tai_xe %}
+                            <span style="background: #e0f2fe; color: #0284c7; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
+                                <i class="fa-solid fa-user-check"></i> {{ don.tai_xe.ten_tai_xe }}
+                            </span>
+                        {% else %}
+                            <span style="background: #fee2e2; color: #dc2626; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
+                                <i class="fa-solid fa-user-xmark"></i> Chưa có tài xế
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td style="padding: 15px; text-align: center;">
+                        <span style="background: #f6f9fc; border: 1px solid #e9ecef; padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; color: #525f7f;">
+                            {{ don.trang_thai }}
+                        </span>
+                    </td>
+
+                    <td style="padding: 15px; text-align: center;">
+                        <a href="{% url 'core:sua_don_hang' don.id %}" title="Sửa đơn" style="color: #fb6340; margin-right: 15px; font-size: 16px;">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+                        <a href="{% url 'core:xoa_don_hang' don.id %}" onclick="return confirm('⚠️ Bạn có chắc muốn xóa đơn hàng {{ don.ma_don }} không?')" title="Xóa đơn" style="color: #f5365c; font-size: 16px;">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 40px; color: #888;">
+                        <i class="fa-solid fa-box-open" style="font-size: 30px; margin-bottom: 10px; display: block;"></i>
+                        Không tìm thấy đơn hàng nào!
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    /* Hiệu ứng hover dòng */
+    tbody tr:hover {
+        background-color: #f8f9fe;
+    }
+    /* Hiệu ứng hover nút hành động */
+    td a:hover {
+        opacity: 0.8;
+        transform: scale(1.1);
+        display: inline-block;
+    }
+</style>
+{% endblock %}

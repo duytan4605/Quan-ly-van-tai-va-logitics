@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 40px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+    
+    <h2 style="color: #32325d; text-align: center; margin-bottom: 25px;">{{ title }}</h2>
+
+    <form method="post">
+        {% csrf_token %} {% for field in form %}
+        <div style="margin-bottom: 15px;">
+            <label style="font-weight: bold; display: block; margin-bottom: 5px; color: #525f7f;">{{ field.label }}</label>
+            {{ field }}
+            <div style="color: red; font-size: 12px;">{{ field.errors }}</div>
+        </div>
+        {% endfor %}
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="{% url 'core:quan_ly_tai_xe' %}" style="text-decoration: none; color: #888; margin-right: 20px;">Hủy bỏ</a>
+            <button type="submit" style="background: linear-gradient(135deg, #11cdef 0%, #1171ef 100%); color: white; border: none; padding: 10px 40px; border-radius: 5px; font-weight: bold; cursor: pointer;">
+                💾 LƯU DỮ LIỆU
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
