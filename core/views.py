@@ -4,7 +4,8 @@ from .models import KhoHang, TaiXe, DonHang
 from .forms import TaiXeForm, KhoHangForm, DonHangForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout # 👉 Import để làm chức năng đăng xuất
-
+from django.db.models import Q, Count  # 👉 Thêm Count vào đây
+import json  # 👉 Thêm json để truyền mảng sang JavaScript
 # ==================== CÁC VIEW NGƯỜI DÙNG (USER VIEWS - AI CŨNG XEM ĐƯỢC) ====================
 
 # 1. Trang chủ (Danh sách đơn hàng)
@@ -39,7 +40,39 @@ def toi_uu_lo_trinh(request):
     }
     return render(request, 'optimize.html', context)
 
+# ==================== CÁC VIEW NGƯỜI DÙNG ====================
 
+# 1. Trang chủ (Đã nâng cấp thành Dashboard Biểu đồ)
+def home(request):
+    tat_ca_don_hang = DonHang.objects.all()
+    
+    # Chuẩn bị biến rỗng (Phòng trường hợp khách chưa đăng nhập)
+    labels_tai_xe = []
+    data_doanh_thu = []
+    labels_trang_thai = []
+    data_trang_thai = []
+
+    # CHỈ TÍNH TOÁN BIỂU ĐỒ KHI LÀ ADMIN ĐÃ ĐĂNG NHẬP
+    if request.user.is_authenticated:
+        # Biểu đồ 1: Top 5 Tài xế có doanh thu cao nhất
+        top_tai_xe = TaiXe.objects.order_by('-doanh_thu_tich_luy')[:5]
+        labels_tai_xe = [tx.ten_tai_xe for tx in top_tai_xe]
+        data_doanh_thu = [float(tx.doanh_thu_tich_luy) if tx.doanh_thu_tich_luy else 0 for tx in top_tai_xe]
+
+        # Biểu đồ 2: Tỉ lệ Trạng thái Đơn hàng
+        thong_ke_don = DonHang.objects.values('trang_thai').annotate(so_luong=Count('id'))
+        labels_trang_thai = [item['trang_thai'] for item in thong_ke_don]
+        data_trang_thai = [item['so_luong'] for item in thong_ke_don]
+
+    context = {
+        'don_hangs': tat_ca_don_hang,
+        # Dùng json.dumps để ép kiểu Python sang mảng JavaScript an toàn
+        'labels_tai_xe': json.dumps(labels_tai_xe),
+        'data_doanh_thu': json.dumps(data_doanh_thu),
+        'labels_trang_thai': json.dumps(labels_trang_thai),
+        'data_trang_thai': json.dumps(data_trang_thai),
+    }
+    return render(request, 'home.html', context)
 # ==================== 1. QUẢN LÝ TÀI XẾ (BẮT BUỘC ĐĂNG NHẬP) ====================
 
 @login_required(login_url='core:login')
