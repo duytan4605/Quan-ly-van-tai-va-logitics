@@ -27,7 +27,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 3%; /* Thu nhỏ padding chút để đủ chỗ cho nhiều nút */
+            padding: 0 3%; 
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -97,23 +97,38 @@
 
             <li style="border-left: 2px solid #eee; height: 30px;"></li>
 
-            <li class="nav-item">
-                <a href="{% url 'core:quan_ly_kho' %}">
-                    <i class="fa-solid fa-warehouse" style="color: #8965e0;"></i> Quản Lý Kho
-                </a>
-            </li>
+            {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a href="{% url 'core:quan_ly_kho' %}">
+                        <i class="fa-solid fa-warehouse" style="color: #8965e0;"></i> Quản Lý Kho
+                    </a>
+                </li>
 
-            <li class="nav-item">
-                <a href="{% url 'core:quan_ly_don_hang' %}">
-                    <i class="fa-solid fa-box-open" style="color: #ffd600;"></i> Quản Lý Đơn
-                </a>
-            </li>
+                <li class="nav-item">
+                    <a href="{% url 'core:quan_ly_don_hang' %}">
+                        <i class="fa-solid fa-box-open" style="color: #ffd600;"></i> Quản Lý Đơn
+                    </a>
+                </li>
 
-            <li class="nav-item">
-                <a href="{% url 'core:quan_ly_tai_xe' %}">
-                    <i class="fa-solid fa-users-gear" style="color: #11cdef;"></i> Quản Lý Tài Xế
-                </a>
-            </li>
+                <li class="nav-item">
+                    <a href="{% url 'core:quan_ly_tai_xe' %}">
+                        <i class="fa-solid fa-users-gear" style="color: #11cdef;"></i> Quản Lý Tài Xế
+                    </a>
+                </li>
+
+                <li class="nav-item" style="margin-left: 10px;">
+                    <a href="{% url 'core:logout' %}" style="background: #fee2e2; color: #dc2626; font-weight: bold;">
+                        <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất ({{ user.username }})
+                    </a>
+                </li>
+
+            {% else %}
+                <li class="nav-item">
+                    <a href="{% url 'core:login' %}" style="background: #e0f2fe; color: #0284c7; font-weight: bold;">
+                        <i class="fa-solid fa-user-lock"></i> Đăng nhập Admin
+                    </a>
+                </li>
+            {% endif %}
         </ul>
     </nav>
 

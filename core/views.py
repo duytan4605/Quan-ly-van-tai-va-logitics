@@ -1,9 +1,11 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.db.models import Q  # 👉 Dùng để tìm kiếm nâng cao (Tên HOẶC SĐT)
+from django.db.models import Q  # Dùng để tìm kiếm nâng cao (Tên HOẶC SĐT)
 from .models import KhoHang, TaiXe, DonHang 
 from .forms import TaiXeForm, KhoHangForm, DonHangForm
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout # 👉 Import để làm chức năng đăng xuất
 
-# ==================== CÁC VIEW NGƯỜI DÙNG (USER VIEWS) ====================
+# ==================== CÁC VIEW NGƯỜI DÙNG (USER VIEWS - AI CŨNG XEM ĐƯỢC) ====================
 
 # 1. Trang chủ (Danh sách đơn hàng)
 def home(request):
@@ -38,15 +40,15 @@ def toi_uu_lo_trinh(request):
     return render(request, 'optimize.html', context)
 
 
-# ==================== 1. QUẢN LÝ TÀI XẾ (CUSTOM ADMIN) ====================
+# ==================== 1. QUẢN LÝ TÀI XẾ (BẮT BUỘC ĐĂNG NHẬP) ====================
 
+@login_required(login_url='core:login')
 def quan_ly_tai_xe(request):
     ds_tai_xe = TaiXe.objects.all()
     
     # --- TÌM KIẾM (SEARCH) ---
     query = request.GET.get('q')
     if query:
-        # Tìm theo Tên HOẶC Số điện thoại
         ds_tai_xe = ds_tai_xe.filter(
             Q(ten_tai_xe__icontains=query) | 
             Q(sdt__icontains=query)
@@ -74,7 +76,7 @@ def quan_ly_tai_xe(request):
     }
     return render(request, 'driver_manager.html', context)
 
-# Chức năng THÊM MỚI Tài xế
+@login_required(login_url='core:login')
 def them_tai_xe(request):
     if request.method == 'POST':
         form = TaiXeForm(request.POST)
@@ -85,7 +87,7 @@ def them_tai_xe(request):
         form = TaiXeForm()
     return render(request, 'form_taixe.html', {'form': form, 'title': 'Thêm Tài Xế Mới'})
 
-# Chức năng SỬA Tài xế
+@login_required(login_url='core:login')
 def sua_tai_xe(request, id):
     taixe = get_object_or_404(TaiXe, id=id)
     if request.method == 'POST':
@@ -97,30 +99,30 @@ def sua_tai_xe(request, id):
         form = TaiXeForm(instance=taixe)
     return render(request, 'form_taixe.html', {'form': form, 'title': f'Sửa thông tin: {taixe.ten_tai_xe}'})
 
-# Chức năng XÓA Tài xế
+@login_required(login_url='core:login')
 def xoa_tai_xe(request, id):
     taixe = get_object_or_404(TaiXe, id=id)
     taixe.delete()
     return redirect('core:quan_ly_tai_xe')
 
 
-# ==================== 2. QUẢN LÝ KHO HÀNG ====================
+# ==================== 2. QUẢN LÝ KHO HÀNG (BẮT BUỘC ĐĂNG NHẬP) ====================
 
+@login_required(login_url='core:login')
 def quan_ly_kho(request):
     ds_kho = KhoHang.objects.all()
 
-    # --- TÌM KIẾM ---
     query = request.GET.get('q')
     if query:
         ds_kho = ds_kho.filter(ten_kho__icontains=query)
 
-    # --- SẮP XẾP ---
     sort_by = request.GET.get('sort')
     if sort_by == 'ten_az':
         ds_kho = ds_kho.order_by('ten_kho')
 
     return render(request, 'warehouse_manager.html', {'ds_kho': ds_kho})
 
+@login_required(login_url='core:login')
 def them_kho(request):
     if request.method == 'POST':
         form = KhoHangForm(request.POST)
@@ -131,6 +133,7 @@ def them_kho(request):
         form = KhoHangForm()
     return render(request, 'form_general.html', {'form': form, 'title': 'Thêm Kho Mới', 'back_url': 'core:quan_ly_kho'})
 
+@login_required(login_url='core:login')
 def sua_kho(request, id):
     kho = get_object_or_404(KhoHang, id=id)
     if request.method == 'POST':
@@ -142,18 +145,19 @@ def sua_kho(request, id):
         form = KhoHangForm(instance=kho)
     return render(request, 'form_general.html', {'form': form, 'title': f'Sửa Kho: {kho.ten_kho}', 'back_url': 'core:quan_ly_kho'})
 
+@login_required(login_url='core:login')
 def xoa_kho(request, id):
     kho = get_object_or_404(KhoHang, id=id)
     kho.delete()
     return redirect('core:quan_ly_kho')
 
 
-# ==================== 3. QUẢN LÝ ĐƠN HÀNG ====================
+# ==================== 3. QUẢN LÝ ĐƠN HÀNG (BẮT BUỘC ĐĂNG NHẬP) ====================
 
+@login_required(login_url='core:login')
 def quan_ly_don_hang(request):
     ds_don = DonHang.objects.all()
 
-    # --- TÌM KIẾM ---
     query = request.GET.get('q')
     if query:
         ds_don = ds_don.filter(
@@ -161,7 +165,6 @@ def quan_ly_don_hang(request):
             Q(ten_nguoi_nhan__icontains=query)
         )
 
-    # --- SẮP XẾP ---
     sort_by = request.GET.get('sort')
     if sort_by == 'moi_nhat':
         ds_don = ds_don.order_by('-ngay_tao')
@@ -170,6 +173,7 @@ def quan_ly_don_hang(request):
 
     return render(request, 'order_manager.html', {'ds_don': ds_don})
 
+@login_required(login_url='core:login')
 def them_don_hang(request):
     if request.method == 'POST':
         form = DonHangForm(request.POST)
@@ -180,6 +184,7 @@ def them_don_hang(request):
         form = DonHangForm()
     return render(request, 'form_general.html', {'form': form, 'title': 'Tạo Đơn Hàng Mới', 'back_url': 'core:quan_ly_don_hang'})
 
+@login_required(login_url='core:login')
 def sua_don_hang(request, id):
     don = get_object_or_404(DonHang, id=id)
     if request.method == 'POST':
@@ -191,7 +196,13 @@ def sua_don_hang(request, id):
         form = DonHangForm(instance=don)
     return render(request, 'form_general.html', {'form': form, 'title': f'Cập nhật Đơn: {don.ma_don}', 'back_url': 'core:quan_ly_don_hang'})
 
+@login_required(login_url='core:login')
 def xoa_don_hang(request, id):
     don = get_object_or_404(DonHang, id=id)
     don.delete()
     return redirect('core:quan_ly_don_hang')
+
+# ==================== 4. HÀM ĐĂNG XUẤT TÙY CHỈNH ====================
+def dang_xuat(request):
+    logout(request)
+    return redirect('core:home')

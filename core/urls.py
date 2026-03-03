@@ -1,4 +1,5 @@
 from django.urls import path
+from django.contrib.auth import views as auth_views
 from . import views
 
 # Định danh App là 'core' (Bắt buộc để dùng {% url 'core:...' %})
@@ -18,18 +19,11 @@ urlpatterns = [
     # 4. Trang Tối ưu hóa lộ trình (TSP)
     path('toi-uu-lo-trinh/', views.toi_uu_lo_trinh, name='toi_uu'),
 
-    # 5. Trang Dashboard Quản lý Tài xế (Xem danh sách)
+    # --- QUẢN LÝ TÀI XẾ ---
     path('quan-ly-tai-xe/', views.quan_ly_tai_xe, name='quan_ly_tai_xe'),
-    
-    # 6. Trang Thêm Tài xế mới (Create)
     path('them-tai-xe/', views.them_tai_xe, name='them_tai_xe'),
-
-    # 7. Trang Sửa thông tin Tài xế (Update) - Cần ID để biết sửa ai
     path('sua-tai-xe/<int:id>/', views.sua_tai_xe, name='sua_tai_xe'),
-
-    # 8. Chức năng Xóa Tài xế (Delete) - Cần ID để biết xóa ai
     path('xoa-tai-xe/<int:id>/', views.xoa_tai_xe, name='xoa_tai_xe'),
-    # ... (Giữ nguyên các path cũ) ...
 
     # --- QUẢN LÝ KHO ---
     path('quan-ly-kho/', views.quan_ly_kho, name='quan_ly_kho'),
@@ -43,4 +37,9 @@ urlpatterns = [
     path('sua-don-hang/<int:id>/', views.sua_don_hang, name='sua_don_hang'),
     path('xoa-don-hang/<int:id>/', views.xoa_don_hang, name='xoa_don_hang'),
 
+    # --- ĐĂNG NHẬP / ĐĂNG XUẤT ---
+    path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
+    
+    # 👇 Đã sửa dòng này gọi đến hàm dang_xuat để Fix lỗi 405 👇
+    path('logout/', views.dang_xuat, name='logout'),
 ]

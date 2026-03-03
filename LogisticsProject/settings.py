@@ -98,3 +98,8 @@ STATICFILES_DIRS = [
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Cấu hình chuyển hướng Đăng nhập / Đăng xuất
+LOGIN_REDIRECT_URL = '/'      # Đăng nhập xong về Trang chủ
+LOGOUT_REDIRECT_URL = '/'     # Đăng xuất xong về Trang chủ
+LOGIN_URL = 'core:login'      # Nếu chưa đăng nhập mà cố tình vào trang Admin thì đuổi về trang này
