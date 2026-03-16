@@ -49,43 +49,47 @@ def dang_xuat(request):
 # ==============================================================================
 
 def home(request):
-    """Trang chủ hiển thị các biểu đồ thống kê KPI cho quản lý"""
+    """Trang chủ hiển thị dashboard và cho phép khách tra cứu đơn hàng"""
+    # 1. Lấy từ khóa tra cứu (Mã đơn hoặc SĐT)
+    q = request.GET.get('q', '')
+    ds_don = DonHang.objects.all().order_by('-id')
+    
+    # Nếu có gõ tìm kiếm thì tiến hành lọc
+    if q:
+        ds_don = ds_don.filter(Q(ma_don__icontains=q) | Q(sdt_nguoi_nhan__icontains=q))
+
+    # 2. Xử lý cho người dùng đã đăng nhập (Quản lý / Shipper)
     if request.user.is_authenticated:
-        # Nếu là tài xế, không cho xem Dashboard Admin, đá sang App cá nhân
-        if hasattr(request.user, 'taixe'):
+        # Nếu là tài xế -> Đá sang App cá nhân
+        if hasattr(request.user, 'taixe'): 
             return redirect('core:app_shipper')
         
-        # --- Dữ liệu cho Biểu đồ Doanh thu (Bar Chart) ---
+        # Lấy dữ liệu cho biểu đồ Admin
         top_tai_xe = TaiXe.objects.order_by('-doanh_thu_tich_luy')[:5]
-        labels_tai_xe = [tx.ten_tai_xe for tx in top_tai_xe]
-        data_doanh_thu = [float(tx.doanh_thu_tich_luy or 0) for tx in top_tai_xe]
-
-        # --- Dữ liệu cho Biểu đồ Trạng thái (Pie Chart) ---
         thong_ke_don = DonHang.objects.values('trang_thai').annotate(so_luong=Count('id'))
-        labels_trang_thai = [item['trang_thai'] for item in thong_ke_don]
-        data_trang_thai = [item['so_luong'] for item in thong_ke_don]
-
-        # --- Các chỉ số nhanh (Small Cards) ---
-        stats = {
-            'tong_don': DonHang.objects.count(),
-            'don_dang_giao': DonHang.objects.filter(trang_thai='ĐANG VẬN CHUYỂN').count(),
-            'tong_doanh_thu': TaiXe.objects.aggregate(Sum('doanh_thu_tich_luy'))['doanh_thu_tich_luy__sum'] or 0,
-            'so_tai_xe': TaiXe.objects.count()
-        }
 
         context = {
-            'don_hangs': DonHang.objects.all().order_by('-id')[:10], # Top 10 đơn mới nhất
-            'stats': stats,
-            'labels_tai_xe': json.dumps(labels_tai_xe),
-            'data_doanh_thu': json.dumps(data_doanh_thu),
-            'labels_trang_thai': json.dumps(labels_trang_thai),
-            'data_trang_thai': json.dumps(data_trang_thai),
+            # Nếu khách đang tìm kiếm thì hiện toàn bộ kết quả, nếu không chỉ hiện 10 đơn mới nhất
+            'don_hangs': ds_don if q else ds_don[:10],
+            'stats': {
+                'tong_don': DonHang.objects.count(),
+                'don_dang_giao': DonHang.objects.filter(trang_thai='ĐANG VẬN CHUYỂN').count(),
+                'tong_doanh_thu': TaiXe.objects.aggregate(Sum('doanh_thu_tich_luy'))['doanh_thu_tich_luy__sum'] or 0,
+                'so_tai_xe': TaiXe.objects.count()
+            },
+            'labels_tai_xe': json.dumps([tx.ten_tai_xe for tx in top_tai_xe]),
+            'data_doanh_thu': json.dumps([float(tx.doanh_thu_tich_luy or 0) for tx in top_tai_xe]),
+            'labels_trang_thai': json.dumps([item['trang_thai'] for item in thong_ke_don]),
+            'data_trang_thai': json.dumps([item['so_luong'] for item in thong_ke_don]),
+            'q': q # Gửi lại từ khóa để giữ nguyên text trên thanh tìm kiếm
         }
         return render(request, 'home.html', context)
     
-    # Khách vãng lai chưa đăng nhập
+    # 3. Xử lý cho Khách vãng lai (Chưa đăng nhập)
+    # Tìm thì show kết quả, không tìm thì show 5 đơn mẫu cho web đỡ trống
     return render(request, 'home.html', {
-        'don_hangs': DonHang.objects.all().order_by('-id')[:5]
+        'don_hangs': ds_don if q else ds_don[:5],
+        'q': q
     })
 
 # ==============================================================================

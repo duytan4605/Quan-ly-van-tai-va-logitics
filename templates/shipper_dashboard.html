@@ -2,6 +2,8 @@
 {% load static %}
 
 {% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
 <style>
     /* Reset main padding để tạo cảm giác App mobile */
     main { padding: 0 !important; }
@@ -18,7 +20,7 @@
     .app-header { 
         background: linear-gradient(135deg, #5e72e4 0%, #825ee4 100%); 
         color: white; 
-        padding: 30px 20px; 
+        padding: 30px 20px 40px 20px; /* Tăng padding bottom để bù cho tool-grid đè lên */
         border-radius: 0 0 30px 30px; 
         text-align: center;
         box-shadow: 0 4px 15px rgba(94, 114, 228, 0.3);
@@ -30,7 +32,9 @@
         grid-template-columns: 1fr 1fr;
         gap: 12px;
         padding: 0 20px;
-        margin-top: -25px; /* Đẩy lên trên nền header */
+        margin-top: -30px; /* Đẩy lên trên nền header */
+        position: relative;
+        z-index: 10;
     }
 
     .tool-card {
@@ -46,14 +50,25 @@
     .tool-card i { font-size: 20px; margin-bottom: 8px; display: block; }
     .tool-card span { font-size: 13px; font-weight: 600; color: #32325d; }
 
-    /* Danh sách đơn hàng */
-    .order-section { padding: 25px 20px; }
+    /* Danh sách đơn hàng & Swiper */
+    .order-section { padding: 25px 0; } /* Bỏ padding ngang để Swiper tràn viền đẹp hơn */
+    
+    .swiper {
+        width: 100%;
+        padding-bottom: 40px; /* Chừa chỗ cho dấu chấm chuyển slide */
+    }
+
+    .swiper-slide {
+        height: auto; /* Để các thẻ tự co giãn đều nhau */
+    }
+
     .order-card { 
         background: white; 
         border-radius: 18px; 
         padding: 20px; 
-        margin-bottom: 20px; 
-        box-shadow: 0 5px 15px rgba(0,0,0,0.04);
+        margin: 0; /* Xóa margin cũ vì Swiper đã lo khoảng cách */
+        height: 100%; /* Cân bằng chiều cao các thẻ */
+        box-shadow: 0 8px 20px rgba(0,0,0,0.06);
         border: 1px solid #edf2f7;
     }
 
@@ -103,6 +118,11 @@
         font-weight: 500;
         outline: none;
     }
+    
+    /* Chỉnh màu cho dấu chấm Swiper */
+    .swiper-pagination-bullet-active {
+        background: #5e72e4 !important;
+    }
 </style>
 
 <div class="mobile-app">
@@ -126,56 +146,84 @@
     </div>
 
     <div class="order-section">
-        <h4 style="color: #32325d; margin-bottom: 20px;">
+        <h4 style="color: #32325d; margin-bottom: 20px; padding: 0 20px;">
             <i class="fa-solid fa-box-archive"></i> Đơn hàng đang xử lý:
         </h4>
 
-        {% for don in don_hangs %}
-        <div class="order-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <span class="order-id">#{{ don.ma_don }}</span>
-                <span class="badge-status {% if don.trang_thai == 'ĐÃ GIAO THÀNH CÔNG' %}status-success{% else %}status-shipping{% endif %}">
-                    {{ don.trang_thai }}
-                </span>
-            </div>
+        <div class="swiper mySwiper">
+            <div class="swiper-wrapper">
+                
+                {% for don in don_hangs %}
+                <div class="swiper-slide">
+                    <div class="order-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <span class="order-id">#{{ don.ma_don }}</span>
+                            <span class="badge-status {% if don.trang_thai == 'ĐÃ GIAO THÀNH CÔNG' %}status-success{% else %}status-shipping{% endif %}">
+                                {{ don.trang_thai }}
+                            </span>
+                        </div>
 
-            <div class="info-row">
-                <i class="fa-solid fa-user"></i>
-                <span><b>{{ don.ten_nguoi_nhan }}</b></span>
-            </div>
-            <div class="info-row">
-                <i class="fa-solid fa-phone" style="color: #2dce89;"></i>
-                <a href="tel:{{ don.sdt_nguoi_nhan }}" style="text-decoration: none; color: inherit;">{{ don.sdt_nguoi_nhan }}</a>
-            </div>
-            <div class="info-row">
-                <i class="fa-solid fa-location-dot" style="color: #f5365c;"></i>
-                <span>{{ don.dia_chi_nguoi_nhan }}</span>
-            </div>
+                        <div class="info-row">
+                            <i class="fa-solid fa-user"></i>
+                            <span><b>{{ don.ten_nguoi_nhan }}</b></span>
+                        </div>
+                        <div class="info-row">
+                            <i class="fa-solid fa-phone" style="color: #2dce89;"></i>
+                            <a href="tel:{{ don.sdt_nguoi_nhan }}" style="text-decoration: none; color: inherit;">{{ don.sdt_nguoi_nhan }}</a>
+                        </div>
+                        <div class="info-row">
+                            <i class="fa-solid fa-location-dot" style="color: #f5365c;"></i>
+                            <span>{{ don.dia_chi_nguoi_nhan }}</span>
+                        </div>
 
-            <a href="{% url 'core:chi_tiet' don.ma_don %}" class="btn-map-single">
-                <i class="fa-solid fa-location-arrow"></i> Chỉ đường / Xem vị trí
-            </a>
+                        <a href="{% url 'core:chi_tiet' don.ma_don %}" class="btn-map-single">
+                            <i class="fa-solid fa-location-arrow"></i> Chỉ đường / Xem vị trí
+                        </a>
 
-            <form action="{% url 'core:shipper_cap_nhat' don.id %}" method="POST">
-                {% csrf_token %}
-                <div class="update-box">
-                    <select name="trang_thai">
-                        <option value="ĐANG VẬN CHUYỂN" {% if don.trang_thai == 'ĐANG VẬN CHUYỂN' %}selected{% endif %}>Đang đi giao</option>
-                        <option value="ĐÃ GIAO THÀNH CÔNG" {% if don.trang_thai == 'ĐÃ GIAO THÀNH CÔNG' %}selected{% endif %}>Giao thành công</option>
-                        <option value="TRẢ HÀNG VỀ KHO" {% if don.trang_thai == 'TRẢ HÀNG VỀ KHO' %}selected{% endif %}>Khách không nhận</option>
-                    </select>
-                    <button type="submit" class="btn-submit" style="padding: 8px 15px; font-size: 12px;">
-                        Lưu
-                    </button>
+                        <form action="{% url 'core:shipper_cap_nhat' don.id %}" method="POST">
+                            {% csrf_token %}
+                            <div class="update-box">
+                                <select name="trang_thai">
+                                    <option value="ĐANG VẬN CHUYỂN" {% if don.trang_thai == 'ĐANG VẬN CHUYỂN' %}selected{% endif %}>Đang đi giao</option>
+                                    <option value="ĐÃ GIAO THÀNH CÔNG" {% if don.trang_thai == 'ĐÃ GIAO THÀNH CÔNG' %}selected{% endif %}>Giao thành công</option>
+                                    <option value="TRẢ HÀNG VỀ KHO" {% if don.trang_thai == 'TRẢ HÀNG VỀ KHO' %}selected{% endif %}>Khách không nhận</option>
+                                </select>
+                                <button type="submit" class="btn-submit" style="padding: 8px 15px; font-size: 12px; border: none; background: #5e72e4; color: white; border-radius: 8px; cursor: pointer;">
+                                    Lưu
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            </form>
+                {% empty %}
+                <div class="swiper-slide" style="padding: 0 20px;">
+                    <div style="text-align: center; padding: 50px 20px; color: #8898aa; background: white; border-radius: 18px; box-shadow: 0 5px 15px rgba(0,0,0,0.04);">
+                        <i class="fa-solid fa-mug-hot" style="font-size: 50px; color: #cbd5e1; margin-bottom: 15px;"></i>
+                        <p>Hôm nay bạn đã giao hết đơn.<br>Hãy nghỉ ngơi nhé!</p>
+                    </div>
+                </div>
+                {% endfor %}
+                
+            </div>
+            <div class="swiper-pagination"></div>
         </div>
-        {% empty %}
-        <div style="text-align: center; padding: 50px 0; color: #8898aa;">
-            <i class="fa-solid fa-mug-hot" style="font-size: 50px; color: #cbd5e1; margin-bottom: 15px;"></i>
-            <p>Hôm nay bạn đã giao hết đơn.<br>Hãy nghỉ ngơi nhé!</p>
         </div>
-        {% endfor %}
-    </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var swiper = new Swiper(".mySwiper", {
+            slidesPerView: 1.15, // Hiển thị 1 thẻ chính và lấp ló 15% thẻ tiếp theo
+            spaceBetween: 15,    // Khoảng cách giữa các thẻ là 15px
+            centeredSlides: true, // Thẻ đang xem luôn nằm giữa màn hình
+            pagination: {
+                el: ".swiper-pagination",
+                clickable: true,
+                dynamicBullets: true, // Dấu chấm tự to/nhỏ tạo hiệu ứng động
+            },
+        });
+    });
+</script>
+
 {% endblock %}

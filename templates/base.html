@@ -221,13 +221,13 @@
             
             <li class="nav-item">
                 <a href="{% url 'core:ban_do_chung' %}">
-                    <i class="fa-solid fa-earth-americas"></i> Bản đồ
+                    <i class="fa-solid fa-earth-americas"></i> Bản đồ GIS
                 </a>
             </li>
 
             <li class="nav-item">
                 <a href="{% url 'core:toi_uu' %}">
-                    <i class="fa-solid fa-wand-magic-sparkles" style="color: #fb6340;"></i> Tối ưu
+                    <i class="fa-solid fa-wand-magic-sparkles" style="color: #fb6340;"></i> Tối ưu đường đi
                 </a>
             </li>
 
@@ -236,16 +236,16 @@
             {% if user.is_authenticated %}
                 {% if user.is_staff %}
                     <li class="nav-item">
-                        <a href="{% url 'core:quan_ly_kho' %}"><i class="fa-solid fa-warehouse" style="color: #8965e0;"></i> Kho</a>
+                        <a href="{% url 'core:quan_ly_kho' %}"><i class="fa-solid fa-warehouse" style="color: #8965e0;"></i> QL Kho</a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'core:quan_ly_don_hang' %}"><i class="fa-solid fa-box-open" style="color: #ffd600;"></i> Đơn hàng</a>
+                        <a href="{% url 'core:quan_ly_don_hang' %}"><i class="fa-solid fa-box-open" style="color: #ffd600;"></i> QL Đơn hàng</a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'core:quan_ly_tai_xe' %}"><i class="fa-solid fa-users-gear" style="color: #11cdef;"></i> Tài xế</a>
+                        <a href="{% url 'core:quan_ly_tai_xe' %}"><i class="fa-solid fa-users-gear" style="color: #11cdef;"></i> QL Tài xế</a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'core:quan_ly_tai_khoan' %}"><i class="fa-solid fa-user-shield" style="color: #2dce89;"></i> Tài khoản</a>
+                        <a href="{% url 'core:quan_ly_tai_khoan' %}"><i class="fa-solid fa-user-shield" style="color: #2dce89;"></i> QL Tài khoản</a>
                     </li>
                 {% endif %}
 
