@@ -1,37 +1,138 @@
-{% extends "base.html" %}
-{% block content %}
-<div style="display: flex; justify-content: center; align-items: center; min-height: 70vh;">
-    <div style="width: 100%; max-width: 400px; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
-        
-        <div style="text-align: center; margin-bottom: 30px;">
-            <i class="fa-solid fa-user-shield" style="font-size: 40px; color: #5e72e4; margin-bottom: 10px;"></i>
-            <h2 style="color: #32325d; margin: 0;">Đăng Nhập Quản Trị</h2>
-            <p style="color: #8898aa; font-size: 14px; margin-top: 5px;">Hệ thống Logistics Pro</p>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - Logistics Pro</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .login-icon {
+            font-size: 50px;
+            color: #5e72e4;
+            margin-bottom: 15px;
+        }
+        .login-title {
+            color: #32325d;
+            font-weight: 700;
+            font-size: 26px;
+            margin: 0 0 8px 0;
+        }
+        .login-subtitle {
+            color: #8898aa;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #525f7f;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .form-control {
+            width: 100%;
+            padding: 14px 15px;
+            border: 2px solid transparent;
+            background-color: #f1f5f9; /* Màu nền xanh nhạt giống ảnh của bạn */
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 14px;
+            color: #334155;
+            box-sizing: border-box;
+            transition: 0.3s;
+        }
+        .form-control:focus {
+            border-color: #5e72e4;
+            background-color: #ffffff;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(94, 114, 228, 0.15);
+        }
+        .btn-login {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+        .alert-error {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            border: 1px solid #fca5a5;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="login-icon">
+            <i class="fa-solid fa-user-shield"></i>
         </div>
+        
+        <h2 class="login-title">Đăng Nhập</h2>
+        <p class="login-subtitle">Hệ thống Logistics Pro</p>
 
-        <form method="post">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert-error"><i class="fa-solid fa-triangle-exclamation"></i> {{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST" action="{% url 'core:login' %}">
             {% csrf_token %}
+            <div class="form-group">
+                <label>Tên đăng nhập</label>
+                <input type="text" name="username" class="form-control" required placeholder="Nhập tài khoản...">
+            </div>
             
-            {% if form.errors %}
-                <div style="background: #fee2e2; color: #dc2626; padding: 10px; border-radius: 5px; margin-bottom: 20px; font-size: 13px; text-align: center;">
-                    Tài khoản hoặc mật khẩu không chính xác!
-                </div>
-            {% endif %}
-
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-weight: 600; color: #525f7f; margin-bottom: 8px;">Tên đăng nhập</label>
-                <input type="text" name="username" required style="width: 100%; padding: 12px; border: 1px solid #dee2e6; border-radius: 6px; outline: none; font-family: inherit;">
+            <div class="form-group">
+                <label>Mật khẩu</label>
+                <input type="password" name="password" class="form-control" required placeholder="••••••••">
             </div>
 
-            <div style="margin-bottom: 30px;">
-                <label style="display: block; font-weight: 600; color: #525f7f; margin-bottom: 8px;">Mật khẩu</label>
-                <input type="password" name="password" required style="width: 100%; padding: 12px; border: 1px solid #dee2e6; border-radius: 6px; outline: none; font-family: inherit;">
-            </div>
-
-            <button type="submit" style="width: 100%; background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%); color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 6px rgba(50,50,93,.11);">
-                ĐĂNG NHẬP
-            </button>
+            <button type="submit" class="btn-login">ĐĂNG NHẬP</button>
         </form>
     </div>
-</div>
-{% endblock %}
+
+</body>
+</html>

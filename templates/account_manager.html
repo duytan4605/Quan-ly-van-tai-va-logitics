@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    body { font-family: 'Poppins', sans-serif; background-color: #f4f6f9; }
+    .dashboard-container { max-width: 1000px; margin: 30px auto; padding: 0 15px; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+    .btn-add { background: linear-gradient(135deg, #2dce89 0%, #2dcecc 100%); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; box-shadow: 0 4px 6px rgba(50,50,93,.11); transition: 0.2s; }
+    .btn-add:hover { transform: translateY(-2px); color: white; }
+    .card-box { background: white; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); padding: 25px; }
+    .custom-table { width: 100%; border-collapse: collapse; }
+    .custom-table th { color: #8898aa; font-weight: 600; text-transform: uppercase; font-size: 12px; padding: 15px; border-bottom: 2px solid #eee; text-align: left; }
+    .custom-table td { padding: 15px; border-bottom: 1px solid #f4f4f4; color: #525f7f; vertical-align: middle; }
+    .role-admin { background: #fef9c3; color: #854d0e; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+    .role-shipper { background: #e2e8f0; color: #475569; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+</style>
+
+<div class="dashboard-container">
+    <div class="page-header">
+        <h2 style="color: #2c3e50; font-weight: 600; margin: 0;"><i class="fa-solid fa-users-gear" style="color: #5e72e4;"></i> Quản lý Tài Khoản</h2>
+        <a href="{% url 'core:them_tai_khoan' %}" class="btn-add"><i class="fa-solid fa-plus"></i> Tạo Tài Khoản</a>
+    </div>
+
+    <div class="card-box">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên đăng nhập (Username)</th>
+                    <th>Phân quyền (Role)</th>
+                    <th style="text-align: center;">Thao Tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tk in ds_tai_khoan %}
+                <tr>
+                    <td style="font-weight: bold; color: #888;">#{{ tk.id }}</td>
+                    <td style="font-weight: bold; color: #32325d; font-size: 15px;">{{ tk.username }}</td>
+                    <td>
+                        {% if tk.is_superuser or tk.is_staff %}
+                            <span class="role-admin"><i class="fa-solid fa-crown"></i> Quản trị viên (Admin)</span>
+                        {% else %}
+                            <span class="role-shipper"><i class="fa-solid fa-motorcycle"></i> Nhân viên (Shipper)</span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align: center;">
+                        <a href="{% url 'core:sua_tai_khoan' tk.id %}" style="color: #fb6340; margin-right: 15px; font-size: 16px;"><i class="fa-solid fa-pen-to-square"></i></a>
+                        {% if tk.id != request.user.id %}
+                        <a href="{% url 'core:xoa_tai_khoan' tk.id %}" onclick="return confirm('Bạn có chắc muốn xóa tài khoản này?')" style="color: #f5365c; font-size: 16px;"><i class="fa-solid fa-trash-can"></i></a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -15,3 +15,5 @@ urlpatterns = [
 # 3. Cấu hình load file tĩnh (CSS/JS/Ảnh) khi chạy thử (DEBUG=True)
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+    

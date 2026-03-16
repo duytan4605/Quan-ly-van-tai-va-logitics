@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User  # 👉 Đã thêm thư viện User
 
 # 1. Bảng Kho Hàng
 class KhoHang(models.Model):
@@ -10,8 +11,11 @@ class KhoHang(models.Model):
     def __str__(self):
         return self.ten_kho
 
-# 2. Bảng Tài Xế (Đã nâng cấp cho Tool Quản lý)
+# 2. Bảng Tài Xế (Đã nâng cấp cho Tool Quản lý & Liên kết Tài khoản)
 class TaiXe(models.Model):
+    # --- 👇 TRƯỜNG MỚI: Liên kết với Tài khoản hệ thống 👇 ---
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Tài khoản đăng nhập")
+    
     # --- Thông tin cơ bản ---
     ten_tai_xe = models.CharField(max_length=100)
     sdt = models.CharField(max_length=15)
@@ -25,7 +29,7 @@ class TaiXe(models.Model):
     
     trang_thai = models.CharField(max_length=20, default='Sẵn sàng')
 
-    # --- 👇 CÁC TRƯỜNG MỚI CHO QUẢN LÝ (HRM & KPI) 👇 ---
+    # --- CÁC TRƯỜNG MỚI CHO QUẢN LÝ (HRM & KPI) ---
     CA_LAM_CHOICES = [
         ('SANG', 'Ca Sáng (6h - 14h)'),
         ('CHIEU', 'Ca Chiều (14h - 22h)'),

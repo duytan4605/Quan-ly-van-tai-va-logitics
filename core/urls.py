@@ -38,8 +38,19 @@ urlpatterns = [
     path('xoa-don-hang/<int:id>/', views.xoa_don_hang, name='xoa_don_hang'),
 
     # --- ĐĂNG NHẬP / ĐĂNG XUẤT ---
-    path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
+    # 👇 ĐÃ SỬA: Dùng hàm dang_nhap tùy chỉnh để phân quyền Shipper/Admin 👇
+    path('login/', views.dang_nhap, name='login'),
     
-    # 👇 Đã sửa dòng này gọi đến hàm dang_xuat để Fix lỗi 405 👇
+    # Kêu gọi hàm dang_xuat để Fix lỗi 405
     path('logout/', views.dang_xuat, name='logout'),
+
+    # --- APP SHIPPER ---
+    path('app-shipper/', views.app_shipper, name='app_shipper'),
+    path('shipper-cap-nhat/<int:don_id>/', views.shipper_cap_nhat, name='shipper_cap_nhat'),
+
+    # --- QUẢN LÝ TÀI KHOẢN ---
+    path('quan-ly-tai-khoan/', views.quan_ly_tai_khoan, name='quan_ly_tai_khoan'),
+    path('them-tai-khoan/', views.them_tai_khoan, name='them_tai_khoan'),
+    path('sua-tai-khoan/<int:id>/', views.sua_tai_khoan, name='sua_tai_khoan'),
+    path('xoa-tai-khoan/<int:id>/', views.xoa_tai_khoan, name='xoa_tai_khoan'),
 ]

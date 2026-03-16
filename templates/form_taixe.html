@@ -1,25 +1,52 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div style="max-width: 600px; margin: 40px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+<style>
+    /* Bọc form ở giữa màn hình */
+    .form-wrapper { max-width: 900px; margin: 40px auto; padding: 0 15px; }
     
-    <h2 style="color: #32325d; text-align: center; margin-bottom: 25px;">{{ title }}</h2>
+    /* Nhãn dán (Label) hiện đại */
+    .form-label { 
+        display: block; font-weight: 600; color: #525f7f; margin-bottom: 8px; 
+        font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; 
+    }
+    
+    /* Nút Quay lại */
+    .btn-back { 
+        background: #f1f5f9; color: #475569; padding: 12px 25px; border-radius: 10px; 
+        text-decoration: none; font-weight: 600; margin-right: 15px; transition: 0.3s; display: inline-block; 
+    }
+    .btn-back:hover { background: #e2e8f0; color: #1e293b; }
+</style>
 
-    <form method="post">
-        {% csrf_token %} {% for field in form %}
-        <div style="margin-bottom: 15px;">
-            <label style="font-weight: bold; display: block; margin-bottom: 5px; color: #525f7f;">{{ field.label }}</label>
-            {{ field }}
-            <div style="color: red; font-size: 12px;">{{ field.errors }}</div>
-        </div>
-        {% endfor %}
+<div class="form-wrapper">
+    <div class="card-box">
+        <h2 style="color: #2c3e50; margin-bottom: 25px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; font-weight: 600;">
+            <i class="fa-solid fa-id-card-clip" style="color: #11cdef;"></i> {{ title }}
+        </h2>
 
-        <div style="text-align: center; margin-top: 30px;">
-            <a href="{% url 'core:quan_ly_tai_xe' %}" style="text-decoration: none; color: #888; margin-right: 20px;">Hủy bỏ</a>
-            <button type="submit" style="background: linear-gradient(135deg, #11cdef 0%, #1171ef 100%); color: white; border: none; padding: 10px 40px; border-radius: 5px; font-weight: bold; cursor: pointer;">
-                💾 LƯU DỮ LIỆU
-            </button>
-        </div>
-    </form>
+        <form method="post">
+            {% csrf_token %}
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                {% for field in form %}
+                    <div style="margin-bottom: 5px;">
+                        <label class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <span style="color: #f5365c; font-size: 12px; margin-top: 5px; display: block;">
+                                <i class="fa-solid fa-circle-exclamation"></i> {{ field.errors.0 }}
+                            </span>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div style="margin-top: 35px; text-align: right; border-top: 2px solid #f1f5f9; padding-top: 20px;">
+                <a href="{% url 'core:quan_ly_tai_xe' %}" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Quay lại</a>
+                <button type="submit" class="btn-submit" style="background: linear-gradient(135deg, #11cdef 0%, #1171ef 100%) !important; box-shadow: 0 4px 15px rgba(17, 205, 239, 0.4);"><i class="fa-solid fa-floppy-disk"></i> LƯU DỮ LIỆU</button>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}

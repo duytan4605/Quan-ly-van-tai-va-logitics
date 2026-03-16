@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Reset main padding để tạo cảm giác App mobile */
+    main { padding: 0 !important; }
+    
+    .mobile-app { 
+        max-width: 500px; 
+        margin: 0 auto; 
+        background: #f8fafc; 
+        min-height: 100vh; 
+        padding-bottom: 50px;
+    }
+
+    /* Header Gradient xịn xò */
+    .app-header { 
+        background: linear-gradient(135deg, #5e72e4 0%, #825ee4 100%); 
+        color: white; 
+        padding: 30px 20px; 
+        border-radius: 0 0 30px 30px; 
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(94, 114, 228, 0.3);
+    }
+
+    /* Bộ công cụ Tối ưu & GIS */
+    .tool-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        padding: 0 20px;
+        margin-top: -25px; /* Đẩy lên trên nền header */
+    }
+
+    .tool-card {
+        background: white;
+        padding: 15px;
+        border-radius: 15px;
+        text-align: center;
+        text-decoration: none;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        transition: 0.3s;
+    }
+    .tool-card:active { transform: scale(0.95); }
+    .tool-card i { font-size: 20px; margin-bottom: 8px; display: block; }
+    .tool-card span { font-size: 13px; font-weight: 600; color: #32325d; }
+
+    /* Danh sách đơn hàng */
+    .order-section { padding: 25px 20px; }
+    .order-card { 
+        background: white; 
+        border-radius: 18px; 
+        padding: 20px; 
+        margin-bottom: 20px; 
+        box-shadow: 0 5px 15px rgba(0,0,0,0.04);
+        border: 1px solid #edf2f7;
+    }
+
+    .order-id { color: #5e72e4; font-weight: 700; font-size: 16px; }
+    
+    .badge-status {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    .status-shipping { background: #e1f5fe; color: #039be5; }
+    .status-success { background: #e8f5e9; color: #2e7d32; }
+
+    .info-row { display: flex; align-items: flex-start; gap: 10px; margin: 12px 0; font-size: 14px; color: #525f7f; }
+    .info-row i { margin-top: 3px; width: 15px; text-align: center; }
+
+    /* Nút xem bản đồ riêng lẻ */
+    .btn-map-single {
+        background: #f6f9fc;
+        color: #5e72e4;
+        display: block;
+        text-align: center;
+        padding: 10px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 13px;
+        margin-bottom: 15px;
+        border: 1px solid #e2e8f0;
+    }
+
+    /* Form cập nhật trạng thái */
+    .update-box { 
+        display: flex; 
+        gap: 8px; 
+        background: #f8fafc; 
+        padding: 10px; 
+        border-radius: 12px; 
+    }
+    .update-box select { 
+        flex: 1; 
+        border: none; 
+        background: transparent; 
+        font-size: 13px; 
+        font-weight: 500;
+        outline: none;
+    }
+</style>
+
+<div class="mobile-app">
+    <div class="app-header">
+        <h2 style="margin-bottom: 5px;"><i class="fa-solid fa-motorcycle"></i> SHIPPER PRO</h2>
+        <p style="font-size: 14px; opacity: 0.9;">
+            Đối tác: <b>{{ tai_xe.ten_tai_xe }}</b><br>
+            Xe: <span style="text-decoration: underline;">{{ tai_xe.bien_so_xe }}</span>
+        </p>
+    </div>
+
+    <div class="tool-grid">
+        <a href="{% url 'core:ban_do_chung' %}" class="tool-card">
+            <i class="fa-solid fa-map-location-dot" style="color: #2dce89;"></i>
+            <span>Bản đồ của tôi</span>
+        </a>
+        <a href="{% url 'core:toi_uu' %}" class="tool-card">
+            <i class="fa-solid fa-wand-magic-sparkles" style="color: #fb6340;"></i>
+            <span>Tối ưu lộ trình</span>
+        </a>
+    </div>
+
+    <div class="order-section">
+        <h4 style="color: #32325d; margin-bottom: 20px;">
+            <i class="fa-solid fa-box-archive"></i> Đơn hàng đang xử lý:
+        </h4>
+
+        {% for don in don_hangs %}
+        <div class="order-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <span class="order-id">#{{ don.ma_don }}</span>
+                <span class="badge-status {% if don.trang_thai == 'ĐÃ GIAO THÀNH CÔNG' %}status-success{% else %}status-shipping{% endif %}">
+                    {{ don.trang_thai }}
+                </span>
+            </div>
+
+            <div class="info-row">
+                <i class="fa-solid fa-user"></i>
+                <span><b>{{ don.ten_nguoi_nhan }}</b></span>
+            </div>
+            <div class="info-row">
+                <i class="fa-solid fa-phone" style="color: #2dce89;"></i>
+                <a href="tel:{{ don.sdt_nguoi_nhan }}" style="text-decoration: none; color: inherit;">{{ don.sdt_nguoi_nhan }}</a>
+            </div>
+            <div class="info-row">
+                <i class="fa-solid fa-location-dot" style="color: #f5365c;"></i>
+                <span>{{ don.dia_chi_nguoi_nhan }}</span>
+            </div>
+
+            <a href="{% url 'core:chi_tiet' don.ma_don %}" class="btn-map-single">
+                <i class="fa-solid fa-location-arrow"></i> Chỉ đường / Xem vị trí
+            </a>
+
+            <form action="{% url 'core:shipper_cap_nhat' don.id %}" method="POST">
+                {% csrf_token %}
+                <div class="update-box">
+                    <select name="trang_thai">
+                        <option value="ĐANG VẬN CHUYỂN" {% if don.trang_thai == 'ĐANG VẬN CHUYỂN' %}selected{% endif %}>Đang đi giao</option>
+                        <option value="ĐÃ GIAO THÀNH CÔNG" {% if don.trang_thai == 'ĐÃ GIAO THÀNH CÔNG' %}selected{% endif %}>Giao thành công</option>
+                        <option value="TRẢ HÀNG VỀ KHO" {% if don.trang_thai == 'TRẢ HÀNG VỀ KHO' %}selected{% endif %}>Khách không nhận</option>
+                    </select>
+                    <button type="submit" class="btn-submit" style="padding: 8px 15px; font-size: 12px;">
+                        Lưu
+                    </button>
+                </div>
+            </form>
+        </div>
+        {% empty %}
+        <div style="text-align: center; padding: 50px 0; color: #8898aa;">
+            <i class="fa-solid fa-mug-hot" style="font-size: 50px; color: #cbd5e1; margin-bottom: 15px;"></i>
+            <p>Hôm nay bạn đã giao hết đơn.<br>Hãy nghỉ ngơi nhé!</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
