@@ -2,78 +2,168 @@
 {% load static %}
 
 {% block content %}
-<div style="padding: 30px; max-width: 1200px; margin: 0 auto;">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    body { font-family: 'Poppins', sans-serif; background-color: #f4f6f9; }
+    .dashboard-container { max-width: 1200px; margin: 30px auto; padding: 0 15px; }
+
+    /* HEADER & NÚT THÊM */
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+    .page-title { color: #2c3e50; font-weight: 600; margin: 0; display: flex; align-items: center; gap: 10px; }
     
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 style="color: #32325d; margin: 0;">🏭 Quản lý Kho Hàng</h2>
-        <a href="{% url 'core:them_kho' %}" style="background: linear-gradient(87deg, #2dce89 0, #2dcecc 100%) !important; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; box-shadow: 0 4px 6px rgba(50,50,93,.11);">
+    .btn-add { 
+        background: linear-gradient(135deg, #2dce89 0%, #2b8a3e 100%); 
+        color: white; padding: 12px 24px; border-radius: 10px; 
+        text-decoration: none; font-weight: 600; font-size: 14px;
+        box-shadow: 0 4px 10px rgba(45, 206, 137, 0.3); transition: 0.3s; 
+        display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-add:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(45, 206, 137, 0.4); color: white; }
+
+    /* THANH TÌM KIẾM & BỘ LỌC */
+    .toolbar { 
+        background: white; padding: 20px; border-radius: 15px; 
+        box-shadow: 0 5px 20px rgba(0,0,0,0.04); margin-bottom: 25px;
+        display: flex; gap: 15px; flex-wrap: wrap; align-items: center;
+    }
+    .search-box { 
+        flex: 1; min-width: 250px; display: flex; align-items: center; 
+        border: 1px solid #e2e8f0; border-radius: 10px; padding: 0 15px; background: #f8fafc; transition: 0.3s;
+    }
+    .search-box:focus-within { border-color: #8965e0; background: white; box-shadow: 0 0 0 3px rgba(137,101,224,0.1); }
+    .search-box input { border: none; outline: none; padding: 12px 10px; width: 100%; background: transparent; font-family: 'Poppins', sans-serif; font-size: 14px; }
+    
+    .filter-select { 
+        padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 10px; background: white; 
+        font-family: 'Poppins', sans-serif; font-size: 14px; color: #475569; outline: none; cursor: pointer; transition: 0.3s;
+    }
+    .filter-select:focus { border-color: #8965e0; }
+    
+    .btn-search { 
+        background: #8965e0; color: white; border: none; padding: 12px 25px; 
+        border-radius: 10px; cursor: pointer; font-weight: 600; font-family: 'Poppins', sans-serif; transition: 0.3s;
+    }
+    .btn-search:hover { background: #7148d4; box-shadow: 0 4px 10px rgba(137,101,224,0.3); }
+    
+    .btn-reset { 
+        background: #f1f5f9; color: #64748b; padding: 12px 20px; border-radius: 10px; 
+        text-decoration: none; transition: 0.3s; display: flex; align-items: center; justify-content: center;
+    }
+    .btn-reset:hover { background: #e2e8f0; color: #0f172a; }
+
+    /* BẢNG DỮ LIỆU */
+    .table-card { background: white; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.04); overflow-x: auto; padding: 25px; }
+    .custom-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+    .custom-table th { color: #8898aa; font-weight: 600; text-transform: uppercase; font-size: 12px; padding: 15px; border-bottom: 2px solid #f1f5f9; text-align: left; }
+    .custom-table tbody tr { background-color: #ffffff; transition: all 0.3s ease; }
+    .custom-table tbody tr:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.06); z-index: 10; position: relative; }
+    .custom-table td { padding: 18px 15px; border-top: 1px solid #f8fafc; border-bottom: 1px solid #f8fafc; color: #525f7f; vertical-align: middle; font-size: 14px; }
+    .custom-table td:first-child { border-left: 1px solid #f8fafc; border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
+    .custom-table td:last-child { border-right: 1px solid #f8fafc; border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
+
+    /* BADGES (Huy hiệu cho tọa độ) */
+    .badge-coord { 
+        background: #f8fafc; color: #475569; border: 1px solid #e2e8f0;
+        padding: 6px 12px; border-radius: 8px; font-size: 13px; font-family: 'Courier New', Courier, monospace; 
+        font-weight: 600; display: inline-block;
+    }
+    
+    /* ACTION BUTTONS */
+    .action-group { display: flex; gap: 10px; justify-content: center; }
+    .btn-action { width: 35px; height: 35px; border-radius: 8px; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: 0.2s; font-size: 14px; }
+    .btn-edit { background: #fff7ed; color: #ea580c; border: 1px solid #ffedd5; }
+    .btn-edit:hover { background: #ea580c; color: white; transform: scale(1.1); }
+    .btn-delete { background: #fef2f2; color: #dc2626; border: 1px solid #fee2e2; }
+    .btn-delete:hover { background: #dc2626; color: white; transform: scale(1.1); }
+</style>
+
+<div class="dashboard-container">
+    
+    <div class="page-header">
+        <h2 class="page-title"><i class="fa-solid fa-warehouse" style="color: #8965e0;"></i> Quản lý Kho Hàng</h2>
+        <a href="{% url 'core:them_kho' %}" class="btn-add">
             <i class="fa-solid fa-plus"></i> Thêm Kho Mới
         </a>
     </div>
 
-    <form method="GET" style="display: flex; gap: 10px; margin-bottom: 20px; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-        
-        <div style="flex: 1; display: flex; align-items: center; border: 1px solid #ddd; border-radius: 5px; padding: 0 10px;">
-            <i class="fa-solid fa-magnifying-glass" style="color: #888;"></i>
-            <input type="text" name="q" placeholder="Nhập tên kho cần tìm..." value="{{ request.GET.q|default:'' }}" 
-                   style="border: none; outline: none; padding: 10px; width: 100%;">
+    <form method="GET" class="toolbar">
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass" style="color: #94a3b8;"></i>
+            <input type="text" name="q" placeholder="Nhập tên kho hàng cần tìm..." value="{{ request.GET.q|default:'' }}">
         </div>
 
-        <select name="sort" onchange="this.form.submit()" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; cursor: pointer;">
-            <option value="">-- Sắp xếp --</option>
-            <option value="ten_az" {% if request.GET.sort == 'ten_az' %}selected{% endif %}>🔤 Tên A-Z</option>
+        <select name="sort" onchange="this.form.submit()" class="filter-select">
+            <option value="">-- Sắp xếp danh sách --</option>
+            <option value="ten_az" {% if request.GET.sort == 'ten_az' %}selected{% endif %}>🔤 Theo Tên A-Z</option>
         </select>
 
-        <button type="submit" style="background: #5e72e4; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">
-            Tìm kiếm
-        </button>
+        <button type="submit" class="btn-search">Áp dụng</button>
         
-        <a href="{% url 'core:quan_ly_kho' %}" title="Xóa bộ lọc" style="display: flex; align-items: center; justify-content: center; text-decoration: none; color: #888; padding: 0 15px; border: 1px solid #ddd; border-radius: 5px;">
-            <i class="fa-solid fa-rotate-left"></i>
+        <a href="{% url 'core:quan_ly_kho' %}" class="btn-reset" title="Xóa bộ lọc">
+            <i class="fa-solid fa-rotate-right"></i>
         </a>
     </form>
 
-    <div style="background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden;">
-        <table style="width: 100%; border-collapse: collapse;">
-            <thead style="background: #f6f9fc; color: #8898aa; font-size: 12px; text-transform: uppercase;">
+    <div class="table-card">
+        <table class="custom-table">
+            <thead>
                 <tr>
-                    <th style="padding: 15px; text-align: left;">Tên Kho</th>
-                    <th style="padding: 15px; text-align: left;">Địa chỉ</th>
-                    <th style="padding: 15px; text-align: center;">Tọa độ (Lat, Lng)</th>
-                    <th style="padding: 15px; text-align: center;">Hành động</th>
+                    <th>Tên Kho Hàng</th>
+                    <th>Địa chỉ hiện tại</th>
+                    <th style="text-align: center;">Tọa độ (Lat, Lng)</th>
+                    <th style="text-align: center;">Hành động</th>
                 </tr>
             </thead>
-            <tbody style="font-size: 14px; color: #525f7f;">
+            <tbody>
                 {% for kho in ds_kho %}
-                <tr style="border-bottom: 1px solid #eee; transition: background 0.2s;">
-                    <td style="padding: 15px; font-weight: bold; color: #32325d;">
-                        <i class="fa-solid fa-warehouse" style="color: #8965e0; margin-right: 5px;"></i> {{ kho.ten_kho }}
+                <tr>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #8965e0, #5e72e4); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px;">
+                                <i class="fa-solid fa-industry"></i>
+                            </div>
+                            <span style="font-weight: 600; color: #334155; font-size: 15px;">{{ kho.ten_kho }}</span>
+                        </div>
                     </td>
 
-                    <td style="padding: 15px;">
-                        {{ kho.dia_chi }}
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px; color: #64748b;">
+                            <i class="fa-solid fa-location-dot" style="color: #f5365c;"></i> 
+                            {{ kho.dia_chi }}
+                        </div>
                     </td>
 
-                    <td style="padding: 15px; text-align: center;">
-                        <span style="background: #f6f9fc; border: 1px solid #e9ecef; padding: 5px 10px; border-radius: 5px; font-family: monospace; color: #525f7f;">
-                            {{ kho.lat }}, {{ kho.lng }}
+                    <td style="text-align: center;">
+                        <span class="badge-coord">
+                            {{ kho.lat|floatformat:4 }}, {{ kho.lng|floatformat:4 }}
                         </span>
                     </td>
 
-                    <td style="padding: 15px; text-align: center;">
-                        <a href="{% url 'core:sua_kho' kho.id %}" title="Sửa kho" style="color: #fb6340; margin-right: 15px; font-size: 16px;">
-                            <i class="fa-solid fa-pen-to-square"></i>
-                        </a>
-                        <a href="{% url 'core:xoa_kho' kho.id %}" onclick="return confirm('⚠️ Cảnh báo: Xóa kho hàng có thể ảnh hưởng đến các đơn hàng đang xuất phát tại đây!\nBạn chắc chắn muốn xóa?')" title="Xóa kho" style="color: #f5365c; font-size: 16px;">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </a>
+                    <td>
+                        <div class="action-group">
+                            <a href="{% url 'core:sua_kho' kho.id %}" class="btn-action btn-edit" title="Sửa thông tin kho">
+                                <i class="fa-solid fa-pen"></i>
+                            </a>
+                            <a href="{% url 'core:xoa_kho' kho.id %}" class="btn-action btn-delete" 
+                               onclick="return confirm('⚠️ Cảnh báo: Việc xóa kho hàng này có thể gây lỗi cho các đơn hàng đang được phân bổ tại đây.\n\nBạn có chắc chắn muốn xóa không?')" title="Xóa kho hàng">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </a>
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="4" style="text-align: center; padding: 40px; color: #888;">
-                        <i class="fa-solid fa-city" style="font-size: 30px; margin-bottom: 10px; display: block;"></i>
-                        Không tìm thấy kho hàng nào!
+                    <td colspan="4" style="text-align: center; padding: 60px 20px; color: #8898aa;">
+                        <i class="fa-solid fa-city" style="font-size: 40px; color: #cbd5e1; margin-bottom: 15px; display: block;"></i>
+                        <span style="font-size: 15px;">
+                            {% if request.GET.q %}
+                                Không tìm thấy kho hàng nào có tên "<b>{{ request.GET.q }}</b>".
+                            {% else %}
+                                Hệ thống chưa có dữ liệu Kho hàng.
+                            {% endif %}
+                        </span>
                     </td>
                 </tr>
                 {% endfor %}
@@ -81,15 +171,4 @@
         </table>
     </div>
 </div>
-
-<style>
-    /* Hiệu ứng hover dòng */
-    tbody tr:hover {
-        background-color: #f8f9fe;
-    }
-    td a:hover {
-        display: inline-block;
-        transform: scale(1.2);
-    }
-</style>
 {% endblock %}
