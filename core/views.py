@@ -16,7 +16,7 @@ from .forms import TaiXeForm, KhoHangForm, DonHangForm, TaiKhoanForm
 # ==============================================================================
 
 def dang_nhap(request):
-    """Xử lý đăng nhập và tự động phân luồng: Admin về Dashboard, Shipper về App"""
+    """Xử lý đăng nhập: KHÔNG báo thành công, CHỈ báo lỗi khi sai tài khoản"""
     if request.user.is_authenticated:
         if hasattr(request.user, 'taixe'):
             return redirect('core:app_shipper')
@@ -30,19 +30,18 @@ def dang_nhap(request):
         
         if user is not None:
             login(request, user)
-            messages.success(request, f'Chào mừng {user.username} đã quay trở lại!')
             if hasattr(user, 'taixe'):
                 return redirect('core:app_shipper')
             return redirect('core:home')
         else:
-            messages.error(request, 'Tên đăng nhập hoặc mật khẩu không chính xác.')
+            # Chỉ hiện thông báo khi có lỗi xảy ra
+            messages.error(request, 'Sai tên đăng nhập hoặc mật khẩu!')
             
     return render(request, 'login.html')
 
 def dang_xuat(request):
-    """Đăng xuất khỏi hệ thống và xóa session"""
+    """Đăng xuất: Thoát thẳng ra trang chủ, im lặng 100%"""
     logout(request)
-    messages.info(request, 'Bạn đã đăng xuất thành công.')
     return redirect('core:home')
 
 # ==============================================================================
@@ -178,7 +177,6 @@ def shipper_cap_nhat(request, don_id):
             
         don.trang_thai = request.POST.get('trang_thai')
         don.save()
-        messages.success(request, f'Cập nhật thành công đơn #{don.ma_don}')
         
     return redirect('core:app_shipper')
 
@@ -188,55 +186,63 @@ def shipper_cap_nhat(request, don_id):
 
 @login_required(login_url='core:login')
 def quan_ly_tai_xe(request):
-    """Danh sách và bộ lọc tìm kiếm tài xế"""
+    """Danh sách, tìm kiếm, sắp xếp và thống kê nhanh đội ngũ Shipper"""
     ds = TaiXe.objects.all()
     
-    # Bộ lọc tìm kiếm theo tên hoặc số điện thoại
+    # 1. Bộ lọc tìm kiếm theo tên hoặc số điện thoại
     q = request.GET.get('q')
     if q:
         ds = ds.filter(Q(ten_tai_xe__icontains=q) | Q(sdt__icontains=q))
     
-    # Logic sắp xếp
+    # 2. Logic sắp xếp linh hoạt
     sort = request.GET.get('sort')
-    if sort == 'ten_az': ds = ds.order_by('ten_tai_xe')
-    elif sort == 'luong_cao': ds = ds.order_by('-doanh_thu_tich_luy')
+    if sort == 'ten_az': 
+        ds = ds.order_by('ten_tai_xe')
+    elif sort == 'luong_cao': 
+        ds = ds.order_by('-doanh_thu_tich_luy')
     
-    return render(request, 'driver_manager.html', {
+    # 3. Tính toán dữ liệu thống kê (Fix lỗi hiển thị ca sáng)
+    context = {
         'ds_tai_xe': ds,
         'tong_so_tx': ds.count(),
-        'dang_online': ds.filter(dang_lam_viec=True).count()
-    })
+        'dang_online': ds.filter(dang_lam_viec=True).count(),
+        'ca_sang': ds.filter(ca_lam_viec='SANG').count(), 
+    }
+    return render(request, 'driver_manager.html', context)
 
 @login_required(login_url='core:login')
 def them_tai_xe(request):
-    if request.method == 'POST':
-        form = TaiXeForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Đã thêm tài xế mới thành công!')
-            return redirect('core:quan_ly_tai_xe')
-    else:
-        form = TaiXeForm()
-    return render(request, 'form_taixe.html', {'form': form, 'title': 'Thêm Tài Xế Mới'})
+    """Tạo mới hồ sơ tài xế"""
+    form = TaiXeForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        return redirect('core:quan_ly_tai_xe')
+        
+    return render(request, 'form_taixe.html', {
+        'form': form, 
+        'title': 'Thêm Tài Xế Mới'
+    })
 
 @login_required(login_url='core:login')
 def sua_tai_xe(request, id):
+    """Cập nhật thông tin tài xế hiện có"""
     taixe = get_object_or_404(TaiXe, id=id)
-    if request.method == 'POST':
-        form = TaiXeForm(request.POST, instance=taixe)
-        if form.is_valid():
-            form.save()
-            messages.success(request, f'Đã cập nhật thông tin cho {taixe.ten_tai_xe}')
-            return redirect('core:quan_ly_tai_xe')
-    else:
-        form = TaiXeForm(instance=taixe)
-    return render(request, 'form_taixe.html', {'form': form, 'title': f'Sửa Tài Xế: {taixe.ten_tai_xe}'})
+    form = TaiXeForm(request.POST or None, instance=taixe)
+    
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        return redirect('core:quan_ly_tai_xe')
+        
+    return render(request, 'form_taixe.html', {
+        'form': form, 
+        'title': f'Sửa Tài Xế: {taixe.ten_tai_xe}'
+    })
 
 @login_required(login_url='core:login')
 def xoa_tai_xe(request, id):
+    """Xóa hồ sơ tài xế khỏi hệ thống"""
     taixe = get_object_or_404(TaiXe, id=id)
     taixe.delete()
-    messages.warning(request, 'Đã xóa hồ sơ tài xế khỏi hệ thống.')
     return redirect('core:quan_ly_tai_xe')
 
 # ==============================================================================
@@ -255,7 +261,6 @@ def them_kho(request):
     form = KhoHangForm(request.POST or None)
     if form.is_valid():
         form.save()
-        messages.success(request, 'Đã thiết lập kho hàng mới.')
         return redirect('core:quan_ly_kho')
     return render(request, 'form_general.html', {'form': form, 'title': 'Thêm Kho Mới', 'back_url': 'core:quan_ly_kho'})
 
@@ -265,14 +270,12 @@ def sua_kho(request, id):
     form = KhoHangForm(request.POST or None, instance=kho)
     if form.is_valid():
         form.save()
-        messages.success(request, f'Đã sửa thông tin {kho.ten_kho}')
         return redirect('core:quan_ly_kho')
     return render(request, 'form_general.html', {'form': form, 'title': f'Sửa Kho: {kho.ten_kho}', 'back_url': 'core:quan_ly_kho'})
 
 @login_required(login_url='core:login')
 def xoa_kho(request, id):
     get_object_or_404(KhoHang, id=id).delete()
-    messages.warning(request, 'Đã xóa kho hàng.')
     return redirect('core:quan_ly_kho')
 
 # ==============================================================================
@@ -296,7 +299,6 @@ def them_don_hang(request):
     form = DonHangForm(request.POST or None)
     if form.is_valid():
         form.save()
-        messages.success(request, 'Đã tạo đơn hàng mới trên hệ thống.')
         return redirect('core:quan_ly_don_hang')
     return render(request, 'form_general.html', {'form': form, 'title': 'Tạo Đơn Hàng Mới', 'back_url': 'core:quan_ly_don_hang'})
 
@@ -306,14 +308,12 @@ def sua_don_hang(request, id):
     form = DonHangForm(request.POST or None, instance=don)
     if form.is_valid():
         form.save()
-        messages.success(request, f'Đã cập nhật đơn hàng #{don.ma_don}')
         return redirect('core:quan_ly_don_hang')
     return render(request, 'form_general.html', {'form': form, 'title': f'Cập nhật Đơn: {don.ma_don}', 'back_url': 'core:quan_ly_don_hang'})
 
 @login_required(login_url='core:login')
 def xoa_don_hang(request, id):
     get_object_or_404(DonHang, id=id).delete()
-    messages.error(request, 'Đã hủy đơn hàng thành công.')
     return redirect('core:quan_ly_don_hang')
 
 # ==============================================================================
@@ -341,7 +341,6 @@ def them_tai_khoan(request):
         form = TaiKhoanForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Đã cấp tài khoản mới thành công.')
             return redirect('core:quan_ly_tai_khoan')
     else:
         form = TaiKhoanForm()
@@ -355,7 +354,6 @@ def sua_tai_khoan(request, id):
         form = TaiKhoanForm(request.POST, instance=tk)
         if form.is_valid():
             form.save()
-            messages.success(request, f'Đã thay đổi thông tin cho User: {tk.username}')
             return redirect('core:quan_ly_tai_khoan')
     else:
         form = TaiKhoanForm(instance=tk)
@@ -371,6 +369,5 @@ def xoa_tai_khoan(request, id):
         messages.error(request, 'Cảnh báo: Bạn không được phép tự xóa tài khoản của chính mình!')
     else:
         tk.delete()
-        messages.success(request, 'Đã thu hồi tài khoản thành công.')
         
     return redirect('core:quan_ly_tai_khoan')
