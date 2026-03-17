@@ -45,28 +45,27 @@
         border-color: #5e72e4; background: #ffffff; box-shadow: 0 0 0 4px rgba(94, 114, 228, 0.15);
     }
 
-    /* Đổi màu riêng cho các ô Tọa độ để nhấn mạnh có thể nhập tay */
-    .coord-field input {
-        background: #fffbeb !important; border-color: #fde68a !important; color: #92400e !important; font-weight: 600;
-    }
-    .coord-field input:focus {
-        border-color: #f59e0b !important; box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.15) !important;
-    }
+    /* Màu vàng nhạt cho ô tọa độ */
+    .coord-field input { background: #fffbeb !important; border-color: #fde68a !important; color: #92400e !important; font-weight: 600; }
+    .coord-field input:focus { border-color: #f59e0b !important; box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.15) !important; }
 
     .map-container {
         background: #fff; padding: 25px; border-radius: 15px; 
-        border: 2px dashed #cbd5e1; margin-bottom: 35px;
-        transition: 0.3s;
+        border: 2px dashed #cbd5e1; margin-bottom: 35px; transition: 0.3s;
     }
     .map-container:hover { border-color: #fb6340; }
     
+    /* KHUNG TÌM KIẾM CÓ CHỨA SUGGESTION DROPDOWN */
     .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
-    .search-box input { 
-        flex: 1; padding: 14px 18px; border: 2px solid #e2e8f0; 
+    .search-wrapper { position: relative; flex: 1; } /* Bọc input để thả danh sách xuống */
+    
+    .search-wrapper input { 
+        width: 100%; padding: 14px 18px; border: 2px solid #e2e8f0; box-sizing: border-box;
         border-radius: 12px; font-size: 14px; outline: none; transition: 0.3s; background: #f8fafc; 
         font-family: 'Poppins', sans-serif;
     }
-    .search-box input:focus { border-color: #fb6340; background: white; box-shadow: 0 0 0 4px rgba(251, 99, 64, 0.15); }
+    .search-wrapper input:focus { border-color: #fb6340; background: white; box-shadow: 0 0 0 4px rgba(251, 99, 64, 0.15); }
+    
     .search-box button { 
         background: linear-gradient(135deg, #fb6340 0%, #f5365c 100%); color: white; 
         border: none; padding: 0 25px; border-radius: 12px; font-weight: 600; font-family: 'Poppins', sans-serif;
@@ -74,24 +73,29 @@
     }
     .search-box button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245, 54, 92, 0.4); }
 
+    /* CSS CHO KHUNG GỢI Ý ĐỊA CHỈ */
+    .suggestion-box {
+        position: absolute; top: 100%; left: 0; right: 0; background: white;
+        border: 1px solid #e2e8f0; border-radius: 12px; margin-top: 8px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 9999;
+        max-height: 250px; overflow-y: auto; display: none; padding: 0; list-style: none;
+    }
+    .suggestion-box::-webkit-scrollbar { width: 6px; }
+    .suggestion-box::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+    .suggestion-box li {
+        padding: 12px 18px; border-bottom: 1px solid #f1f5f9; cursor: pointer;
+        font-size: 13px; color: #475569; display: flex; align-items: flex-start; gap: 10px; transition: 0.2s;
+    }
+    .suggestion-box li:last-child { border-bottom: none; }
+    .suggestion-box li:hover { background: #fff5f5; color: #f5365c; }
+    .suggestion-box li i { margin-top: 3px; color: #fb6340; }
+
     #map-picker { height: 350px; width: 100%; border-radius: 12px; border: 1px solid #e2e8f0; z-index: 1; }
 
-    .form-actions {
-        display: flex; justify-content: flex-end; align-items: center; gap: 15px;
-        margin-top: 40px; padding-top: 25px; border-top: 1px solid #e2e8f0;
-    }
-    .btn-back { 
-        padding: 14px 28px; border-radius: 12px; font-weight: 600; color: #64748b;
-        background: #f1f5f9; text-decoration: none; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px;
-    }
+    .form-actions { display: flex; justify-content: flex-end; align-items: center; gap: 15px; margin-top: 40px; padding-top: 25px; border-top: 1px solid #e2e8f0; }
+    .btn-back { padding: 14px 28px; border-radius: 12px; font-weight: 600; color: #64748b; background: #f1f5f9; text-decoration: none; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; }
     .btn-back:hover { background: #e2e8f0; color: #0f172a; }
-    .btn-submit {
-        padding: 14px 28px; border-radius: 12px; font-weight: 600; color: white;
-        background: linear-gradient(135deg, #5e72e4 0%, #825ee4 100%);
-        border: none; cursor: pointer; transition: 0.3s;
-        box-shadow: 0 4px 15px rgba(94, 114, 228, 0.3); font-family: 'Poppins', sans-serif; font-size: 15px;
-        display: inline-flex; align-items: center; gap: 8px;
-    }
+    .btn-submit { padding: 14px 28px; border-radius: 12px; font-weight: 600; color: white; background: linear-gradient(135deg, #5e72e4 0%, #825ee4 100%); border: none; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(94, 114, 228, 0.3); font-family: 'Poppins', sans-serif; font-size: 15px; display: inline-flex; align-items: center; gap: 8px; }
     .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(94, 114, 228, 0.4); }
 </style>
 
@@ -112,13 +116,16 @@
                     </label>
                     
                     <div class="search-box">
-                        <input type="text" id="address-search" placeholder="Nhập địa chỉ (VD: Landmark 81, Hồ Chí Minh)...">
-                        <button type="button" id="btn-search"><i class="fa-solid fa-magnifying-glass"></i> Tìm nhanh</button>
+                        <div class="search-wrapper">
+                            <input type="text" id="address-search" placeholder="Nhập địa chỉ cần tìm (VD: Vincom, Hồ Chí Minh)..." autocomplete="off">
+                            <ul id="suggestion-list" class="suggestion-box"></ul>
+                        </div>
+                        <button type="button" id="btn-search"><i class="fa-solid fa-magnifying-glass"></i> Đến ngay</button>
                     </div>
 
                     <div id="map-picker"></div>
                     <div style="color: #64748b; font-size: 13px; font-style: italic; margin-top: 12px; display: flex; align-items: center; gap: 6px;">
-                        <i class="fa-solid fa-circle-info" style="color: #5e72e4;"></i> Kéo thả ghim màu xanh trên bản đồ để tự động điền tọa độ vào ô bên dưới.
+                        <i class="fa-solid fa-circle-info" style="color: #5e72e4;"></i> Gõ từ khóa để nhận gợi ý, hoặc kéo thả ghim màu xanh để tinh chỉnh vị trí.
                     </div>
                 </div>
 
@@ -153,92 +160,117 @@ document.addEventListener("DOMContentLoaded", function() {
     const latInput = document.querySelector('input[name="lat"]') || document.querySelector('input[name="lat_khach"]');
     const lngInput = document.querySelector('input[name="lng"]') || document.querySelector('input[name="lng_khach"]');
     const addressInput = document.querySelector('input[name="dia_chi"]') || document.querySelector('input[name="dia_chi_nguoi_nhan"]');
+    
+    const searchInput = document.getElementById('address-search');
+    const suggestionList = document.getElementById('suggestion-list');
+    const btnSearch = document.getElementById('btn-search');
+    
+    let timeoutId; // Dùng để trì hoãn gõ phím (Debounce)
 
     let startLat = latInput && latInput.value ? parseFloat(latInput.value) : 10.7769;
     let startLng = lngInput && lngInput.value ? parseFloat(lngInput.value) : 106.7009;
 
     var map = L.map('map-picker').setView([startLat, startLng], 14);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap'
-    }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
 
     var marker = L.marker([startLat, startLng], {draggable: true}).addTo(map);
 
-    // 1. Hàm cập nhật tọa độ vào ô Input khi thao tác trên bản đồ
+    // Cập nhật số liệu vào form
     function updateInputs(lat, lng) {
         if(latInput) latInput.value = lat.toFixed(6);
         if(lngInput) lngInput.value = lng.toFixed(6);
     }
 
-    marker.on('dragend', function (e) {
-        var pos = marker.getLatLng();
-        updateInputs(pos.lat, pos.lng);
-    });
+    marker.on('dragend', function () { updateInputs(marker.getLatLng().lat, marker.getLatLng().lng); });
+    map.on('click', function(e) { marker.setLatLng(e.latlng); updateInputs(e.latlng.lat, e.latlng.lng); });
 
-    map.on('click', function(e) {
-        marker.setLatLng(e.latlng);
-        updateInputs(e.latlng.lat, e.latlng.lng);
-    });
-
-    // 2. Tính năng cực xịn: Cập nhật ngược từ Input lên Bản Đồ
+    // Đồng bộ ngược: Gõ số -> Map nhảy theo
     function updateMapFromInputs() {
         if (latInput && lngInput) {
             let newLat = parseFloat(latInput.value.replace(',', '.'));
             let newLng = parseFloat(lngInput.value.replace(',', '.'));
-            
             if (!isNaN(newLat) && !isNaN(newLng)) {
                 marker.setLatLng([newLat, newLng]);
-                map.flyTo([newLat, newLng], 16); // Bản đồ tự động bay tới tọa độ mới
+                map.flyTo([newLat, newLng], 16); 
             }
         }
     }
-
     if (latInput) latInput.addEventListener('input', updateMapFromInputs);
     if (lngInput) lngInput.addEventListener('input', updateMapFromInputs);
 
 
-    // GEOCODING (TÌM KIẾM ĐỊA CHỈ)
-    const btnSearch = document.getElementById('btn-search');
-    const searchInput = document.getElementById('address-search');
+    // ===============================================
+    // TÍNH NĂNG AUTOCOMPLETE (GỢI Ý ĐỊA CHỈ TRỰC TIẾP)
+    // ===============================================
 
-    function executeSearch() {
-        var query = searchInput.value;
-        if(query.trim() === "") return;
+    // Khi người dùng đang gõ
+    searchInput.addEventListener('input', function() {
+        clearTimeout(timeoutId);
+        const query = this.value;
 
-        var oldText = btnSearch.innerHTML;
-        btnSearch.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang tìm...';
+        // Nếu gõ ít hơn 2 ký tự thì ẩn bảng gợi ý
+        if (query.length < 2) {
+            suggestionList.style.display = 'none';
+            return;
+        }
 
-        fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(query + ', Việt Nam'))
-            .then(response => response.json())
-            .then(data => {
-                btnSearch.innerHTML = oldText;
-                
-                if(data && data.length > 0) {
-                    var lat = parseFloat(data[0].lat);
-                    var lng = parseFloat(data[0].lon);
-
-                    map.setView([lat, lng], 16);
-                    marker.setLatLng([lat, lng]);
-                    updateInputs(lat, lng);
-
-                    if(addressInput && addressInput.value === "") {
-                        addressInput.value = data[0].display_name.split(',')[0]; 
+        // Chờ 400ms sau khi ngừng gõ mới gọi API để tránh sập server
+        timeoutId = setTimeout(() => {
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Việt Nam')}&limit=5`)
+                .then(response => response.json())
+                .then(data => {
+                    suggestionList.innerHTML = '';
+                    
+                    if (data && data.length > 0) {
+                        data.forEach(item => {
+                            const li = document.createElement('li');
+                            li.innerHTML = `<i class="fa-solid fa-location-dot"></i> <span>${item.display_name}</span>`;
+                            
+                           // Khi Click vào 1 gợi ý
+                            li.onclick = function() {
+                                const lat = parseFloat(item.lat);
+                                const lng = parseFloat(item.lon);
+                                
+                                map.setView([lat, lng], 17);
+                                marker.setLatLng([lat, lng]);
+                                updateInputs(lat, lng);
+                                
+                                // Vẫn giữ tên ngắn cho thanh tìm kiếm ở trên để nhìn cho gọn
+                                searchInput.value = item.display_name.split(',')[0]; 
+                                
+                                // SỬA Ở ĐÂY: Ép điền TOÀN BỘ địa chỉ xuống ô Input bên dưới luôn!
+                                if(addressInput) {
+                                    // Xóa chữ "Việt Nam" ở cuối đi cho chuyên nghiệp (nếu có)
+                                    let fullAddress = item.display_name.replace(', Việt Nam', '');
+                                    addressInput.value = fullAddress;
+                                }
+                                
+                                suggestionList.style.display = 'none'; // Ẩn dropdown
+                            };
+                            suggestionList.appendChild(li);
+                        });
+                        suggestionList.style.display = 'block'; // Hiện dropdown
+                    } else {
+                        suggestionList.innerHTML = '<li style="color: #94a3b8; justify-content: center; font-style: italic;">Không tìm thấy địa chỉ nào...</li>';
+                        suggestionList.style.display = 'block';
                     }
-                } else {
-                    alert("Không tìm thấy địa chỉ này! Thử nhập đầy đủ Tên đường, Quận, Thành phố.");
-                }
-            })
-            .catch(error => {
-                btnSearch.innerHTML = oldText;
-                alert("Lỗi kết nối máy chủ tìm kiếm.");
-            });
-    }
+                })
+                .catch(err => console.error(err));
+        }, 400); // 400ms
+    });
 
-    btnSearch.addEventListener('click', executeSearch);
-    searchInput.addEventListener('keypress', function(e) {
-        if(e.key === 'Enter') {
-            e.preventDefault(); 
-            executeSearch();
+    // Ẩn danh sách gợi ý khi bấm ra ngoài vùng trống
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !suggestionList.contains(e.target)) {
+            suggestionList.style.display = 'none';
+        }
+    });
+
+    // Vẫn giữ tính năng tìm kiếm bằng Nút "Đến ngay" phòng trường hợp click nhầm
+    btnSearch.addEventListener('click', function() {
+        if(searchInput.value.trim() !== "") {
+            // Trigger 1 sự kiện input giả lập để nó chạy dropdown
+            searchInput.dispatchEvent(new Event('input')); 
         }
     });
 });
