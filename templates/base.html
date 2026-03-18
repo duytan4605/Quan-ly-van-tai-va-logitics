@@ -210,7 +210,7 @@
             Logistics<span style="color: #5e72e4;">Pro</span>
         </a>
 
-        <ul class="nav-links">
+       <ul class="nav-links">
             <li class="nav-item">
                 {% if user.is_authenticated and user.taixe %}
                     <a href="{% url 'core:app_shipper' %}"><i class="fa-solid fa-house-user"></i> Trang chủ </a>
@@ -218,22 +218,21 @@
                     <a href="{% url 'core:home' %}"><i class="fa-solid fa-house"></i> Trang chủ</a>
                 {% endif %}
             </li>
-            
-            <li class="nav-item">
-                <a href="{% url 'core:ban_do_chung' %}">
-                    <i class="fa-solid fa-earth-americas"></i> Bản đồ GIS
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a href="{% url 'core:toi_uu' %}">
-                    <i class="fa-solid fa-wand-magic-sparkles" style="color: #fb6340;"></i> Tối ưu đường đi
-                </a>
-            </li>
-
-            <li style="border-left: 2px solid #eee; height: 30px; margin: 0 5px;"></li>
 
             {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a href="{% url 'core:ban_do_chung' %}">
+                        <i class="fa-solid fa-earth-americas"></i> Bản đồ GIS
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'core:toi_uu' %}">
+                        <i class="fa-solid fa-wand-magic-sparkles" style="color: #fb6340;"></i> Tối ưu đường đi
+                    </a>
+                </li>
+
+                <li style="border-left: 2px solid #eee; height: 30px; margin: 0 5px;"></li>
+
                 {% if user.is_staff %}
                     <li class="nav-item">
                         <a href="{% url 'core:quan_ly_kho' %}"><i class="fa-solid fa-warehouse" style="color: #8965e0;"></i> QL Kho</a>
@@ -257,10 +256,31 @@
 
             {% else %}
                 <li class="nav-item">
+                    <a href="#" onclick="yeuCauDangNhap(event)">
+                        <i class="fa-solid fa-earth-americas" style="color: #5e72e4;"></i> Bản đồ GIS
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" onclick="yeuCauDangNhap(event)">
+                        <i class="fa-solid fa-wand-magic-sparkles" style="color: #fb6340;"></i> Tối ưu đường đi
+                    </a>
+                </li>
+
+                <li style="border-left: 2px solid #eee; height: 30px; margin: 0 5px;"></li>
+
+                <li class="nav-item">
                     <a href="{% url 'core:login' %}" style="background: #e0f2fe; color: #0284c7; font-weight: bold;">
                         <i class="fa-solid fa-user-lock"></i> Đăng nhập 
                     </a>
                 </li>
+
+                <script>
+                    function yeuCauDangNhap(e) {
+                        e.preventDefault(); // Ngăn trình duyệt nhảy trang
+                        alert("⚠️ Tính năng này dành riêng cho Đối tác vận tải.\nVui lòng đăng nhập để sử dụng!");
+                        window.location.href = "{% url 'core:login' %}"; // Đá sang trang đăng nhập
+                    }
+                </script>
             {% endif %}
         </ul>
     </nav>
