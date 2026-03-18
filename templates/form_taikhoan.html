@@ -115,7 +115,13 @@
                             {{ field }}
                             
                             {% if field.help_text %}
-                                <span class="helptext">{{ field.help_text|safe }}</span>
+                                <span class="helptext">
+                                    {% if field.name == 'username' %}
+                                        Bắt buộc. Tối đa 150 ký tự. Chỉ bao gồm chữ cái, chữ số và các ký tự @/./+/-/_
+                                    {% else %}
+                                        {{ field.help_text|safe }}
+                                    {% endif %}
+                                </span>
                             {% endif %}
 
                             {% if field.errors %}

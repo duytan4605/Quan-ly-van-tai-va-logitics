@@ -103,3 +103,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = '/'      # Đăng nhập xong về Trang chủ
 LOGOUT_REDIRECT_URL = '/'     # Đăng xuất xong về Trang chủ
 LOGIN_URL = 'core:login'      # Nếu chưa đăng nhập mà cố tình vào trang Admin thì đuổi về trang này
+# CẤU HÌNH GỬI EMAIL BẰNG MAILTRAP
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
+EMAIL_PORT = '2525'
+EMAIL_HOST_USER = '5b6191184c3b45'
+EMAIL_HOST_PASSWORD = 'fcc8d5b585aa1d'
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+DEFAULT_FROM_EMAIL = 'Hệ Thống LogisticsPro <noreply@logisticspro.com>'

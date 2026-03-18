@@ -1,6 +1,7 @@
 from django import forms
 from .models import TaiXe, KhoHang, DonHang
 from django.contrib.auth.models import User # 👉 Nhớ import User ở tuốt trên cùng nhé
+from django.core.exceptions import ValidationError
 # 1. Form cho Tài xế
 class TaiXeForm(forms.ModelForm):
     class Meta:
@@ -86,7 +87,28 @@ class DonHangForm(forms.ModelForm):
                 ]
             ),
         }
-        # ... (Các form cũ giữ nguyên) ...
+    def clean(self):
+        cleaned_data = super().clean()
+        kho_hang = cleaned_data.get('kho_hang') # Lấy cái kho mà người dùng vừa chọn trên Form
+
+        if kho_hang:
+            # Lấy số đơn đang có trong kho (từ hàm mình vừa viết ở Bước 1)
+            so_luong_hien_tai = kho_hang.so_don_dang_luu_tru()
+
+            # Nếu là đang SỬA đơn hàng cũ (đơn này đã nằm sẵn trong kho rồi), thì phải trừ đi 1 
+            # để tránh trường hợp kho đang full 100/100, vào sửa sđt khách bấm Lưu lại bị báo lỗi
+            if self.instance.pk and self.instance.kho_hang == kho_hang:
+                so_luong_hien_tai -= 1
+
+            # BẮT ĐẦU KIỂM TRA SỨC CHỨA
+            if so_luong_hien_tai >= kho_hang.suc_chua_toi_da:
+                # Quăng lỗi đỏ lên màn hình ngay lập tức!
+                raise ValidationError(
+                    f"⚠️ LỖI: {kho_hang.ten_kho} đã đạt giới hạn sức chứa ({kho_hang.suc_chua_toi_da} đơn). "
+                    f"Vui lòng luân chuyển sang kho lân cận!"
+                )
+
+        return cleaned_data # ... (Các form cũ giữ nguyên) ...
 
 # ==================== 4. FORM TÀI KHOẢN (USER) ====================
 class TaiKhoanForm(forms.ModelForm):

@@ -11,6 +11,16 @@ class KhoHang(models.Model):
     def __str__(self):
         return self.ten_kho
 
+    # Đã được thụt lề vào trong cho đúng chuẩn
+    suc_chua_toi_da = models.IntegerField(default=100, verbose_name="Sức chứa tối đa (Đơn)")
+
+    def so_don_dang_luu_tru(self):
+        """Hàm đếm số đơn hàng đang nằm trong kho (Bỏ qua các đơn đã giao xong hoặc hủy)"""
+        # Lưu ý: Sửa chữ 'donhang_set' thành 'donhangs' nếu bạn có dùng related_name='donhangs'
+        return self.donhang_set.exclude(trang_thai__in=['ĐÃ GIAO THÀNH CÔNG', 'HỦY']).count()
+
+
+
 # 2. Bảng Tài Xế (Đã nâng cấp cho Tool Quản lý & Liên kết Tài khoản)
 class TaiXe(models.Model):
     # --- 👇 TRƯỜNG MỚI: Liên kết với Tài khoản hệ thống 👇 ---
