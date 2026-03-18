@@ -2,6 +2,7 @@ from django import forms
 from .models import TaiXe, KhoHang, DonHang
 from django.contrib.auth.models import User # 👉 Nhớ import User ở tuốt trên cùng nhé
 from django.core.exceptions import ValidationError
+from .models import DonHang # Nhớ import model DonHang nếu chưa có
 # 1. Form cho Tài xế
 class TaiXeForm(forms.ModelForm):
     class Meta:
@@ -52,7 +53,7 @@ class DonHangForm(forms.ModelForm):
         
         # 👇 Đã thêm Labels để Việt hóa chữ trên Form 👇
         labels = {
-            'ma_don': 'Mã Đơn Hàng (VD: DH001)',
+            'ma_don': 'Mã Đơn Hàng ',
             'ten_nguoi_nhan': 'Tên Khách Hàng',
             'dia_chi_nguoi_nhan': 'Địa Chỉ Giao Hàng',
             'sdt_nguoi_nhan': 'Số Điện Thoại',
@@ -87,17 +88,44 @@ class DonHangForm(forms.ModelForm):
                 ]
             ),
         }
+
+    # HÀM NÀY ĐÃ ĐƯỢC THỤT LỀ VÀO ĐÚNG BÊN TRONG CLASS DonHangForm
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # TỰ ĐỘNG ĐIỀN MÃ ĐƠN HÀNG KHI "THÊM MỚI" (Không áp dụng khi Sửa)
+        if not self.instance.pk: 
+            last_order = DonHang.objects.all().order_by('id').last()
+            
+            if not last_order:
+                next_ma_don = 'DH001'
+            else:
+                try:
+                    # Cắt chữ 'DH' lấy phần số, cộng thêm 1
+                    last_num = int(last_order.ma_don[2:]) 
+                    next_ma_don = f'DH{last_num + 1:03d}'
+                except ValueError:
+                    next_ma_don = 'DH001' # Đề phòng data cũ bị lỗi format
+            
+            # Ép giá trị ban đầu vào ô input
+            self.fields['ma_don'].initial = next_ma_don
+
+        # Khóa luôn ô này, chỉ cho nhìn (Read-only) để không ai sửa bậy làm hỏng cấu trúc
+        self.fields['ma_don'].widget.attrs['readonly'] = True
+        self.fields['ma_don'].widget.attrs['style'] = 'background-color: #e2e8f0; color: #64748b; cursor: not-allowed; font-weight: bold;'
+
     def clean(self):
         cleaned_data = super().clean()
-        kho_hang = cleaned_data.get('kho_hang') # Lấy cái kho mà người dùng vừa chọn trên Form
+        
+        # Sửa thành 'kho_xuat_phat' cho đúng với tên trường trong form của bạn
+        kho_hang = cleaned_data.get('kho_xuat_phat') 
 
         if kho_hang:
-            # Lấy số đơn đang có trong kho (từ hàm mình vừa viết ở Bước 1)
+            # Lấy số đơn đang có trong kho
             so_luong_hien_tai = kho_hang.so_don_dang_luu_tru()
 
             # Nếu là đang SỬA đơn hàng cũ (đơn này đã nằm sẵn trong kho rồi), thì phải trừ đi 1 
-            # để tránh trường hợp kho đang full 100/100, vào sửa sđt khách bấm Lưu lại bị báo lỗi
-            if self.instance.pk and self.instance.kho_hang == kho_hang:
+            if self.instance.pk and self.instance.kho_xuat_phat == kho_hang:
                 so_luong_hien_tai -= 1
 
             # BẮT ĐẦU KIỂM TRA SỨC CHỨA
@@ -108,8 +136,7 @@ class DonHangForm(forms.ModelForm):
                     f"Vui lòng luân chuyển sang kho lân cận!"
                 )
 
-        return cleaned_data # ... (Các form cũ giữ nguyên) ...
-
+        return cleaned_data
 # ==================== 4. FORM TÀI KHOẢN (USER) ====================
 class TaiKhoanForm(forms.ModelForm):
     password = forms.CharField(

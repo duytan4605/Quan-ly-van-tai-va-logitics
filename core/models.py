@@ -61,7 +61,8 @@ class TaiXe(models.Model):
 
 # 3. Bảng Đơn Hàng
 class DonHang(models.Model):
-    ma_don = models.CharField(max_length=20, unique=True)
+    # 👇 Đã thêm blank=True để hệ thống cho phép tự động điền
+    ma_don = models.CharField(max_length=20, unique=True, blank=True)
     ten_nguoi_nhan = models.CharField(max_length=100)
     dia_chi_nguoi_nhan = models.CharField(max_length=200)
     sdt_nguoi_nhan = models.CharField(max_length=15)
@@ -78,6 +79,22 @@ class DonHang(models.Model):
     
     trang_thai = models.CharField(max_length=50, default='Đang xử lý')
     ngay_tao = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        # 👇 LOGIC TỰ ĐỘNG TẠO MÃ ĐƠN HÀNG (VD: DH001, DH002...) 👇
+        if not self.ma_don:
+            last_order = DonHang.objects.all().order_by('id').last()
+            if not last_order:
+                self.ma_don = 'DH001'
+            else:
+                try:
+                    # Lấy phần số sau chữ 'DH' và cộng thêm 1
+                    last_num = int(last_order.ma_don[2:])
+                    self.ma_don = f'DH{last_num + 1:03d}'
+                except ValueError:
+                    self.ma_don = 'DH001'
+                    
+        super(DonHang, self).save(*args, **kwargs)
 
     def __str__(self):
         return f"Đơn {self.ma_don}"
