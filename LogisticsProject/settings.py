@@ -112,3 +112,16 @@ EMAIL_HOST_PASSWORD = 'fcc8d5b585aa1d'
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 DEFAULT_FROM_EMAIL = 'Hệ Thống LogisticsPro <noreply@logisticspro.com>'
+DATABASES = {
+    'default': {
+        'ENGINE': 'mssql',
+        'NAME': 'logistics_db',         # Tên Database ông vừa tạo ở Bước 1
+        'HOST': 'MSI\\NGUYENDUYTAN',    # Tên Server (Phải có 2 dấu \\)
+        'PORT': '',                     # Để trống vì ông dùng Named Instance
+        'OPTIONS': {
+            'driver': 'ODBC Driver 17 for SQL Server', 
+            # Dùng Windows Auth và bỏ qua check bảo mật SSL ở máy ảo/máy cá nhân
+            'extra_params': 'Trusted_Connection=yes;TrustServerCertificate=yes;',
+        },
+    }
+}
