@@ -114,14 +114,11 @@ EMAIL_USE_SSL = False
 DEFAULT_FROM_EMAIL = 'Hệ Thống LogisticsPro <noreply@logisticspro.com>'
 DATABASES = {
     'default': {
-        'ENGINE': 'mssql',
-        'NAME': 'logistics_db',         # Tên Database ông vừa tạo ở Bước 1
-        'HOST': 'MSI\\NGUYENDUYTAN',    # Tên Server (Phải có 2 dấu \\)
-        'PORT': '',                     # Để trống vì ông dùng Named Instance
-        'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server', 
-            # Dùng Windows Auth và bỏ qua check bảo mật SSL ở máy ảo/máy cá nhân
-            'extra_params': 'Trusted_Connection=yes;TrustServerCertificate=yes;',
-        },
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'logistics_db',
+        'USER': 'postgres',             
+        'PASSWORD': '123', # 👉 Điền cái pass lúc nãy ông cài PostgreSQL vào đây
+        'HOST': 'localhost',
+        'PORT': '5432',                 
     }
 }
