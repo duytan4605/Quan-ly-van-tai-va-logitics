@@ -6,6 +6,49 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
+    /* ---- ĐOẠN CSS NÀY CHỈ CÓ TÁC DỤNG KHI BẤM NÚT IN ---- */
+/* ---- CSS DÀNH RIÊNG CHO BẢN IN PDF ---- */
+@media print {
+    /* 1. Giấu sạch Menu (nav, header), thanh Tìm kiếm (.toolbar), Sidebar, nút bấm */
+    nav, header, .navbar, .topbar, .nav-sidebar, 
+    .page-header, .toolbar, .pagination-container, 
+    th:last-child, td:last-child {
+        display: none !important;
+    }
+    
+    /* 2. Căn lề lại trang in để mất cái ngày giờ mặc định của trình duyệt */
+    @page {
+        margin: 0.5cm; 
+    }
+    
+    /* 3. Ép bảng rộng ra tràn trang */
+    body { background-color: white !important; margin: 0; padding: 0;}
+    .main-content, .dashboard-container, .card-box {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+    
+    /* 4. Kẻ khung cho bảng */
+    .custom-table {
+        border-collapse: collapse !important;
+        width: 100% !important;
+    }
+    .custom-table th, .custom-table td {
+        border: 1px solid #000 !important;
+        color: #000 !important;
+        padding: 8px !important;
+    }
+    
+    /* 5. Giữ màu sắc của các nút Trạng thái */
+    .status-badge {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}
+/* ---------------------------------------------------- */
     body { font-family: 'Poppins', sans-serif; background-color: #f4f6f9; }
     .dashboard-container { max-width: 1200px; margin: 30px auto; padding: 0 15px; }
 
@@ -89,10 +132,20 @@
 <div class="dashboard-container">
     
     <div class="page-header">
-        <h2 class="page-title"><i class="fa-solid fa-box-open" style="color: #5e72e4;"></i> Quản lý Đơn Hàng</h2>
-        <a href="{% url 'core:them_don_hang' %}" class="btn-add">
-            <i class="fa-solid fa-plus"></i> Tạo Đơn Mới
-        </a>
+        <h2 class="page-title"><i class="fa-solid fa-box-open" style="color: #5e72e4;"></i> Bảng điều phối vận đơn hệ thống</h2>
+        
+        <div style="display: flex; gap: 12px; align-items: center;">
+               <a href="javascript:void(0);" onclick="window.print()" class="btn-add" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);">
+                 <i class="fa-solid fa-file-pdf"></i> Xuất PDF
+               </a>
+            <a href="{% url 'core:export_excel' %}" class="btn-add" style="background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); box-shadow: 0 4px 10px rgba(22, 163, 74, 0.3);">
+                <i class="fa-solid fa-file-excel"></i> Xuất Excel
+            </a>
+
+            <a href="{% url 'core:them_don_hang' %}" class="btn-add">
+                <i class="fa-solid fa-plus"></i> Tạo Đơn Mới
+            </a>
+        </div>
     </div>
 
     <form method="GET" class="toolbar">

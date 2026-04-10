@@ -5,3 +5,6 @@ from .models import KhoHang, TaiXe, DonHang
 admin.site.register(KhoHang)
 admin.site.register(TaiXe)
 admin.site.register(DonHang)
+
+from .models import LichSuKho
+admin.site.register(LichSuKho)

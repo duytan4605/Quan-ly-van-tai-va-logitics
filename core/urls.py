@@ -47,10 +47,18 @@ urlpatterns = [
     # --- APP SHIPPER ---
     path('app-shipper/', views.app_shipper, name='app_shipper'),
     path('shipper-cap-nhat/<int:don_id>/', views.shipper_cap_nhat, name='shipper_cap_nhat'),
-
+    path('api/tao-don-hang/', views.api_tao_don_hang, name='api_tao_don_hang'),
     # --- QUẢN LÝ TÀI KHOẢN ---
     path('quan-ly-tai-khoan/', views.quan_ly_tai_khoan, name='quan_ly_tai_khoan'),
     path('them-tai-khoan/', views.them_tai_khoan, name='them_tai_khoan'),
     path('sua-tai-khoan/<int:id>/', views.sua_tai_khoan, name='sua_tai_khoan'),
     path('xoa-tai-khoan/<int:id>/', views.xoa_tai_khoan, name='xoa_tai_khoan'),
+    path('export-excel/', views.export_excel, name='export_excel'),
+    # Dán thêm 3 dòng này vào core/urls.py
+    path('quan-ly-lich-su/', views.quan_ly_lich_su, name='quan_ly_lich_su'),
+    path('quan-ly-lich-su/them/', views.them_lich_su, name='them_lich_su'),
+    path('quan-ly-lich-su/xoa/<int:id>/', views.xoa_lich_su, name='xoa_lich_su'),
+    path('partner-demo/', views.partner_demo_tao_don, name='partner_demo'),
+    path('api/check-new-orders/', views.check_new_orders, name='check_new_orders'),
+
 ]

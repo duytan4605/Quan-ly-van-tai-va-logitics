@@ -122,10 +122,18 @@
                             </span>
                         </td>
                         <td>
-                            {% if tk.is_superuser or tk.is_staff %}
-                                <span class="role-admin"><i class="fa-solid fa-crown"></i> Admin / Quản lý</span>
+                           {% if tk.is_superuser or tk.is_staff %}
+                                <span style="background: #fef2f2; color: #e11d48; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+                                    <i class="fa-solid fa-shield-halved"></i> Quản trị viên
+                                </span>
+                            {% elif tk.taixe %}
+                                <span style="background: #fff8f1; color: #ca8a04; border: 1px solid #fde68a; padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+                                    <i class="fa-solid fa-motorcycle"></i> Nhân viên Shipper
+                                </span>
                             {% else %}
-                                <span class="role-shipper"><i class="fa-solid fa-motorcycle"></i> Nhân viên Shipper</span>
+                                <span style="background: #f0f9ff; color: #0284c7; border: 1px solid #bae6fd; padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+                                    <i class="fa-solid fa-handshake"></i> Đối Tác (B2B)
+                                </span>
                             {% endif %}
                         </td>
                         <td>

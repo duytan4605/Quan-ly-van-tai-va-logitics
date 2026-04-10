@@ -98,3 +98,25 @@ class DonHang(models.Model):
 
     def __str__(self):
         return f"Đơn {self.ma_don}"
+    
+    # Gợi ý Model trong models.py
+class LichSuKho(models.Model):
+    TRANG_THAI_CHOICES = [
+        ('NHẬP KHO', 'Nhập kho'),
+        ('XUẤT KHO', 'Xuất kho'),
+        ('ĐANG PHÂN LOẠI', 'Đang phân loại'),
+        ('ĐANG LUÂN CHUYỂN', 'Đang luân chuyển'),
+        ('BÀN GIAO SHIPPER', 'Bàn giao Shipper'),
+    ]
+    don_hang = models.ForeignKey(DonHang, on_delete=models.CASCADE, related_name='lich_su_kho')
+    # Thêm null=True, blank=True vào đây
+    kho = models.ForeignKey(KhoHang, on_delete=models.CASCADE, null=True, blank=True) 
+    trang_thai_buoc = models.CharField(
+        max_length=100, 
+        choices=TRANG_THAI_CHOICES, # <--- CỰC KỲ QUAN TRỌNG
+        default='NHẬP KHO'
+    )
+    thoi_gian = models.DateTimeField(auto_now_add=True)
+    ghi_chu = models.TextField(blank=True, null=True)
+    class Meta:
+        ordering = ['-thoi_gian']

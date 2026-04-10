@@ -166,3 +166,18 @@ class TaiKhoanForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+    
+    from django import forms
+    
+from .models import LichSuKho
+class LichSuKhoForm(forms.ModelForm):
+    class Meta:
+        model = LichSuKho
+        fields = ['don_hang', 'kho', 'trang_thai_buoc', 'ghi_chu']
+        widgets = {
+            'don_hang': forms.Select(attrs={'class': 'form-control'}),
+            'kho': forms.Select(attrs={'class': 'form-control'}),
+            # ĐỔI THÀNH SELECT Ở ĐÂY
+            'trang_thai_buoc': forms.Select(attrs={'class': 'form-control'}), 
+            'ghi_chu': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Ghi chú thêm nếu có...'}),
+        }

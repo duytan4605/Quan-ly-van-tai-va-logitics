@@ -487,21 +487,69 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
-    <div class="card-box">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px;">
-            <h2 class="page-title">
-                <i class="fa-solid fa-truck-fast" style="color: #5e72e4;"></i> Danh sách Đơn hàng Logistics
-            </h2>
-            
-            <form method="GET" action="{% url 'core:home' %}" style="display: flex; max-width: 450px; width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border-radius: 12px; overflow: hidden;">
-                <input type="text" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Tra mã đơn hoặc Số điện thoại..." 
-                       style="flex: 1; padding: 12px 18px; border: 2px solid #e2e8f0; border-right: none; border-radius: 12px 0 0 12px; outline: none; font-family: 'Be Vietnam Pro', sans-serif !important; font-size: 13px; background: #f8fafc;">
-                <button type="submit" style="background: linear-gradient(135deg, #5e72e4 0%, #825ee4 100%); color: white; border: none; padding: 0 25px; border-radius: 0 12px 12px 0; cursor: pointer; font-weight: 600; font-family: 'Be Vietnam Pro', sans-serif !important; transition: 0.3s;">
-                    <i class="fa-solid fa-magnifying-glass"></i> Tra cứu
-                </button>
-            </form>
-        </div>
-        
+    {% if user.is_authenticated %}
+    <div class="card-box" style="padding: 25px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+        <h2 style="margin: 0; font-size: 22px; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 12px;">
+            <i class="fa-solid fa-truck-fast" style="color: #5e72e4; font-size: 24px;"></i> 
+            Danh sách Đơn hàng
+        </h2>
+       
+        <form method="GET" action="{% url 'core:home' %}" style="display: flex; width: 100%; max-width: 420px; height: 45px; border: 1.5px solid #e2e8f0; border-radius: 10px; overflow: hidden; background: #ffffff; transition: 0.3s;">
+            <input type="text" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Tra mã đơn hoặc Số điện thoại..." 
+                   style="flex: 1; padding: 0 15px; border: none; outline: none; font-size: 14px; font-family: 'Be Vietnam Pro', sans-serif !important;">
+            <button type="submit" style="background: #5e72e4; color: white; border: none; padding: 0 20px; cursor: pointer; font-weight: 700; font-family: 'Be Vietnam Pro', sans-serif !important; display: flex; align-items: center; gap: 8px; transition: 0.3s;">
+                <i class="fa-solid fa-magnifying-glass"></i> Tra cứu
+            </button>
+        </form>
+    </div>
+    
+    <div style="display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none;">
+        <a href="?status=ALL{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" 
+           style="white-space: nowrap; padding: 8px 18px; border-radius: 50px; font-size: 12.5px; font-weight: 700; text-decoration: none; transition: 0.3s;
+                  {% if current_status == 'ALL' or not current_status %} background: #5e72e4; color: white; box-shadow: 0 4px 10px rgba(94, 114, 228, 0.2);
+                  {% else %} background: #f8fafc; color: #64748b; border: 1.2px solid #e2e8f0; {% endif %}">
+            Tất cả
+        </a>
+
+        <a href="?status=CHỜ TÀI XẾ{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" 
+           style="white-space: nowrap; padding: 8px 18px; border-radius: 50px; font-size: 12.5px; font-weight: 700; text-decoration: none; transition: 0.3s;
+                  {% if current_status == 'CHỜ TÀI XẾ' %} background: #f59e0b; color: white;
+                  {% else %} background: #f8fafc; color: #64748b; border: 1.2px solid #e2e8f0; {% endif %}">
+            Chờ tài xế
+        </a>
+
+        <a href="?status=ĐANG VẬN CHUYỂN{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" 
+           style="white-space: nowrap; padding: 8px 18px; border-radius: 50px; font-size: 12.5px; font-weight: 700; text-decoration: none; transition: 0.3s;
+                  {% if current_status == 'ĐANG VẬN CHUYỂN' %} background: #3b82f6; color: white;
+                  {% else %} background: #f8fafc; color: #64748b; border: 1.2px solid #e2e8f0; {% endif %}">
+            Đang vận chuyển
+        </a>
+
+        <a href="?status=ĐÃ GIAO THÀNH CÔNG{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" 
+           style="white-space: nowrap; padding: 8px 18px; border-radius: 50px; font-size: 12.5px; font-weight: 700; text-decoration: none; transition: 0.3s;
+                  {% if current_status == 'ĐÃ GIAO THÀNH CÔNG' %} background: #10b981; color: white;
+                  {% else %} background: #f8fafc; color: #64748b; border: 1.2px solid #e2e8f0; {% endif %}">
+            Đã giao
+        </a>
+
+        <a href="?status=TRẢ HÀNG VỀ KHO{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" 
+           style="white-space: nowrap; padding: 8px 18px; border-radius: 50px; font-size: 12.5px; font-weight: 700; text-decoration: none; transition: 0.3s;
+                  {% if current_status == 'TRẢ HÀNG VỀ KHO' %} background: #8b5cf6; color: white;
+                  {% else %} background: #f8fafc; color: #64748b; border: 1.2px solid #e2e8f0; {% endif %}">
+            Trả về kho
+        </a>
+
+        <a href="?status=ĐÃ HỦY{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" 
+           style="white-space: nowrap; padding: 8px 18px; border-radius: 50px; font-size: 12.5px; font-weight: 700; text-decoration: none; transition: 0.3s;
+                  {% if current_status == 'ĐÃ HỦY' %} background: #ef4444; color: white;
+                  {% else %} background: #f8fafc; color: #64748b; border: 1.2px solid #e2e8f0; {% endif %}">
+            Đã hủy
+        </a>
+    </div>
+    
+    <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 5px 0 20px 0;">
+
         <div style="overflow-x: auto;">
             <table class="custom-table">
                 <thead>
@@ -515,43 +563,132 @@
                     </tr>
                 </thead>
                 <tbody>
-    {% for dh in don_hangs %}
-    <tr>
-        <td>
-            <span style="font-weight: 700; color: #1e293b;">#{{ dh.ma_don }}</span>
-        </td>
-        <td>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <div style="width: 35px; height: 35px; background: #e0e7ff; color: #5e72e4; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">
-                    <i class="fa-regular fa-user"></i>
-                </div>
-                <span style="font-weight: 500;">{{ dh.ten_nguoi_nhan }}</span>
+                {% for dh in don_hangs %}
+                    <tr>
+                        <td>
+                            <span style="font-weight: 700; color: #1e293b;">#{{ dh.ma_don }}</span>
+                        </td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 35px; height: 35px; background: #e0e7ff; color: #5e72e4; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                                    <i class="fa-regular fa-user"></i>
+                                </div>
+                                <span style="font-weight: 500;">{{ dh.ten_nguoi_nhan }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <i class="fa-solid fa-location-dot" style="color: #f5365c; margin-right: 6px;"></i> 
+                            {{ dh.dia_chi_nguoi_nhan }}
+                        </td>
+                        <td style="font-family: monospace; font-size: 13px;">
+                            {{ dh.sdt_nguoi_nhan }}
+                        </td>
+                        <td>
+                            <span class="status-badge">{{ dh.trang_thai }}</span>
+                        </td>
+                        <td style="text-align: center;">
+                            <a href="{% url 'core:chi_tiet' dh.ma_don %}" class="btn-view-map">
+                                <i class="fa-solid fa-map-location-dot"></i> Lộ trình
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" style="padding: 0; border: none;">
+                            {% if request.GET.q %}
+                                <div style="text-align: center; padding: 60px; font-family: 'Be Vietnam Pro', sans-serif;">
+                                    <i class="fa-solid fa-magnifying-glass-minus" style="font-size: 45px; color: #cbd5e1; margin-bottom: 20px; display: block;"></i>
+                                    <h3 style="color: #475569; font-weight: 600;">Không tìm thấy kết quả</h3>
+                                    <p style="color: #94a3b8;">Không có đơn hàng nào khớp với "<b>{{ request.GET.q }}</b>".</p>
+                                </div>
+                            {% else %}
+                                <div style="text-align: center; padding: 60px; color: #64748b;">
+                                    Hiện chưa có đơn hàng nào trong trạng thái này.
+                                </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if page_obj.has_other_pages %}
+        <div style="display: flex; justify-content: center; margin-top: 25px;">
+            <ul style="display: flex; list-style: none; padding: 0; gap: 8px; margin: 0;">
+                {% if page_obj.has_previous %}
+                    <li><a href="?page={{ page_obj.previous_page_number }}&status={{ current_status }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" style="padding: 8px 15px; border-radius: 8px; background: #f1f5f9; color: #475569; text-decoration: none; font-weight: 600;"><i class="fa-solid fa-chevron-left"></i></a></li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li><span style="padding: 8px 15px; border-radius: 8px; background: #5e72e4; color: white; font-weight: bold; box-shadow: 0 4px 10px rgba(94, 114, 228, 0.3);">{{ num }}</span></li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li><a href="?page={{ num }}&status={{ current_status }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" style="padding: 8px 15px; border-radius: 8px; background: #f1f5f9; color: #475569; text-decoration: none; font-weight: 600; transition: 0.2s;">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li><a href="?page={{ page_obj.next_page_number }}&status={{ current_status }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" style="padding: 8px 15px; border-radius: 8px; background: #f1f5f9; color: #475569; text-decoration: none; font-weight: 600;"><i class="fa-solid fa-chevron-right"></i></a></li>
+                {% endif %}
+            </ul>
+        </div>
+        {% endif %}
+
+    </div>
+    {% else %}
+    <div class="card-box">
+        <form method="GET" action="{% url 'core:home' %}" style="display: flex; max-width: 600px; margin: 0 auto 30px auto; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border-radius: 12px; overflow: hidden;">
+            <input type="text" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Tra mã đơn hoặc Số điện thoại..." 
+                   style="flex: 1; padding: 15px 20px; border: 2px solid #e2e8f0; border-right: none; border-radius: 12px 0 0 12px; outline: none; font-family: 'Be Vietnam Pro', sans-serif !important; font-size: 14px; background: #f8fafc;">
+            <button type="submit" style="background: linear-gradient(135deg, #5e72e4 0%, #825ee4 100%); color: white; border: none; padding: 0 30px; border-radius: 0 12px 12px 0; cursor: pointer; font-weight: 600; font-family: 'Be Vietnam Pro', sans-serif !important; transition: 0.3s; font-size: 14px;">
+                <i class="fa-solid fa-magnifying-glass"></i> Tra cứu
+            </button>
+        </form>
+
+        {% if request.GET.q and don_hangs %}
+            <div style="overflow-x: auto;">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Mã Đơn</th>
+                            <th>Khách Hàng</th>
+                            <th>Địa Chỉ Giao</th>
+                            <th>Liên Hệ</th>
+                            <th>Trạng Thái</th>
+                            <th style="text-align: center;">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for dh in don_hangs %}
+                        <tr>
+                            <td><span style="font-weight: 700; color: #1e293b;">#{{ dh.ma_don }}</span></td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 35px; height: 35px; background: #e0e7ff; color: #5e72e4; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                                        <i class="fa-regular fa-user"></i>
+                                    </div>
+                                    <span style="font-weight: 500;">{{ dh.ten_nguoi_nhan }}</span>
+                                </div>
+                            </td>
+                            <td><i class="fa-solid fa-location-dot" style="color: #f5365c; margin-right: 6px;"></i>{{ dh.dia_chi_nguoi_nhan }}</td>
+                            <td style="font-family: monospace; font-size: 13px;">{{ dh.sdt_nguoi_nhan }}</td>
+                            <td><span class="status-badge">{{ dh.trang_thai }}</span></td>
+                            <td style="text-align: center;">
+                                <a href="{% url 'core:chi_tiet' dh.ma_don %}" class="btn-view-map">
+                                    <i class="fa-solid fa-map-location-dot"></i> Lộ trình
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
-        </td>
-        <td>
-            <i class="fa-solid fa-location-dot" style="color: #f5365c; margin-right: 6px;"></i> 
-            {{ dh.dia_chi_nguoi_nhan }}
-        </td>
-        <td style="font-family: monospace; font-size: 13px;">
-            {{ dh.sdt_nguoi_nhan }}
-        </td>
-        <td>
-            <span class="status-badge">{{ dh.trang_thai }}</span>
-        </td>
-        <td style="text-align: center;">
-            <a href="{% url 'core:chi_tiet' dh.ma_don %}" class="btn-view-map">
-                <i class="fa-solid fa-map-location-dot"></i> Lộ trình
-            </a>
-        </td>
-    </tr>
-    {% empty %}
-<tr>
-    <td colspan="6" style="padding: 0; border: none;">
-        {% if q %}
+        {% elif request.GET.q %}
             <div style="text-align: center; padding: 60px; font-family: 'Be Vietnam Pro', sans-serif;">
                 <i class="fa-solid fa-magnifying-glass-minus" style="font-size: 45px; color: #cbd5e1; margin-bottom: 20px; display: block;"></i>
                 <h3 style="color: #475569; font-weight: 600;">Không tìm thấy kết quả</h3>
-                <p style="color: #94a3b8;">Mã vận đơn "<b>{{ q }}</b>" không tồn tại trong hệ thống.</p>
+                <p style="color: #94a3b8;">Mã vận đơn "<b>{{ request.GET.q }}</b>" không tồn tại trong hệ thống.</p>
             </div>
         {% else %}
             <div style="display: flex; align-items: center; background: #ffffff; margin: 20px; border-radius: 24px; border: 1px solid #f1f5f9; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.03); font-family: 'Be Vietnam Pro', sans-serif;">
@@ -589,24 +726,17 @@
                     </div>
                 </div>
 
-               <div style="flex: 0.8; height: 400px; position: relative; background-color: #f8fafc;">
-                        <img src="{% static 'img/image_b08c6e.png' %}" 
-                             alt="Order Tracking Image"
-                             onerror="this.onerror=null; this.src='{% static "img/dian-2.jpg" %}';"
-                             style="width: 100%; height: 100%; object-fit: cover; clip-path: polygon(10% 0%, 100% 0%, 100% 100%, 0% 100%);">
-                        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to right, #ffffff 0%, transparent 30%);"></div>
-                    </div>
-
+                <div style="flex: 0.8; height: 400px; position: relative; background-color: #f8fafc;">
+                    <img src="{% static 'img/image_b08c6e.png' %}" 
+                         alt="Order Tracking Image"
+                         onerror="this.onerror=null; this.src='{% static "img/dian-2.jpg" %}';"
+                         style="width: 100%; height: 100%; object-fit: cover; clip-path: polygon(10% 0%, 100% 0%, 100% 100%, 0% 100%);">
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to right, #ffffff 0%, transparent 30%);"></div>
+                </div>
             </div>
         {% endif %}
-    </td>
-</tr>
-    {% endfor %}
-</tbody>
-            </table>
-        </div>
     </div>
-
+    {% endif %}
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         

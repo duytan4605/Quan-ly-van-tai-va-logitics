@@ -110,26 +110,109 @@
                 {% csrf_token %}
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px;">
                     {% for field in form %}
-                        <div class="django-field">
-                            <label class="form-label">{{ field.label }}</label>
-                            {{ field }}
-                            
-                            {% if field.help_text %}
-                                <span class="helptext">
-                                    {% if field.name == 'username' %}
-                                        Bắt buộc. Tối đa 150 ký tự. Chỉ bao gồm chữ cái, chữ số và các ký tự @/./+/-/_
-                                    {% else %}
-                                        {{ field.help_text|safe }}
-                                    {% endif %}
-                                </span>
-                            {% endif %}
+                        {% if field.name == 'is_staff' %}
+                            <div class="role-selector-container" style="grid-column: 1 / -1; margin-top: 10px;">
+                                <label style="font-size: 13px; font-weight: 600; color: #475569; text-transform: uppercase; margin-bottom: 12px; display: block;">Vai trò tài khoản</label>
+                                
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                                    <label class="role-card" onclick="setRole('admin')" style="cursor: pointer; margin:0;">
+                                        <input type="radio" name="fake_role" id="role_admin" style="display:none;" {% if field.value %}checked{% endif %}>
+                                        <div class="role-content" style="border: 2px solid {% if field.value %}#5e72e4{% else %}#e2e8f0{% endif %}; background: {% if field.value %}#f0f2ff{% else %}transparent{% endif %}; padding: 15px 10px; border-radius: 12px; text-align: center; transition: 0.3s; height: 100%;">
+                                            <i class="fa-solid fa-user-shield mb-2" style="color: {% if field.value %}#5e72e4{% else %}#f5365c{% endif %}; font-size: 24px; margin-bottom: 10px;"></i>
+                                            <div style="font-weight: bold; font-size: 14px; color: {% if field.value %}#5e72e4{% else %}#32325d{% endif %}; margin-bottom: 5px;">Quản trị viên</div>
+                                            <small class="text-muted" style="font-size: 11.5px; color: #8898aa;">Toàn quyền hệ thống</small>
+                                        </div>
+                                    </label>
 
-                            {% if field.errors %}
-                                <span style="color: #f5365c; font-size: 13px; margin-top: 8px; display: block; font-weight: 500;">
-                                    <i class="fa-solid fa-circle-exclamation"></i> {{ field.errors.0 }}
-                                </span>
-                            {% endif %}
-                        </div>
+                                    <label class="role-card" onclick="setRole('partner')" style="cursor: pointer; margin:0;">
+                                        <input type="radio" name="fake_role" id="role_partner" style="display:none;" {% if not field.value %}checked{% endif %}>
+                                        <div class="role-content" style="border: 2px solid {% if not field.value %}#5e72e4{% else %}#e2e8f0{% endif %}; background: {% if not field.value %}#f0f2ff{% else %}transparent{% endif %}; padding: 15px 10px; border-radius: 12px; text-align: center; transition: 0.3s; height: 100%;">
+                                            <i class="fa-solid fa-handshake mb-2" style="color: {% if not field.value %}#5e72e4{% else %}#0ea5e9{% endif %}; font-size: 24px; margin-bottom: 10px;"></i>
+                                            <div style="font-weight: bold; font-size: 14px; color: {% if not field.value %}#5e72e4{% else %}#32325d{% endif %}; margin-bottom: 5px;">Đối Tác (B2B)</div>
+                                            <small class="text-muted" style="font-size: 11.5px; color: #8898aa;">Đẩy vận đơn vào kho</small>
+                                        </div>
+                                    </label>
+
+                                    <label class="role-card" onclick="setRole('shipper')" style="cursor: pointer; margin:0;">
+                                        <input type="radio" name="fake_role" id="role_shipper" style="display:none;">
+                                        <div class="role-content" style="border: 2px solid #e2e8f0; padding: 15px 10px; border-radius: 12px; text-align: center; transition: 0.3s; height: 100%;">
+                                            <i class="fa-solid fa-motorcycle mb-2" style="color: #fb6340; font-size: 24px; margin-bottom: 10px;"></i>
+                                            <div style="font-weight: bold; font-size: 14px; color: #32325d; margin-bottom: 5px;">Tài Xế (Shipper)</div>
+                                            <small class="text-muted" style="font-size: 11.5px; color: #8898aa;">Giao hàng trên App</small>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div id="role-hint" style="margin-top: 20px; padding: 15px; background: {% if field.value %}#fef2f2{% else %}#e0f2fe{% endif %}; color: {% if field.value %}#e11d48{% else %}#0284c7{% endif %}; border-radius: 8px; font-size: 13px; line-height: 1.5;">
+                                    {% if field.value %}
+                                        <i class="fa-solid fa-shield-halved"></i> <b>Quản trị viên:</b> Có toàn quyền xem Dashboard, Bản đồ GIS và Quản lý kho.
+                                    {% else %}
+                                        <i class="fa-solid fa-circle-info"></i> <b>Đối tác B2B:</b> Mặc định dùng cho Shopee, TikTok... để tạo đơn.
+                                    {% endif %}
+                                </div>
+
+                                <div style="display: none;">{{ field }}</div>
+                            </div>
+
+                            <script>
+                                function setRole(role) {
+                                    // Reset giao diện
+                                    document.querySelectorAll('.role-content').forEach(el => {
+                                        el.style.borderColor = '#e2e8f0';
+                                        el.style.background = 'transparent';
+                                        el.querySelector('div').style.color = '#32325d';
+                                        if(el.parentElement.querySelector('input').id === 'role_admin') el.querySelector('i').style.color = '#f5365c';
+                                        if(el.parentElement.querySelector('input').id === 'role_partner') el.querySelector('i').style.color = '#0ea5e9';
+                                        if(el.parentElement.querySelector('input').id === 'role_shipper') el.querySelector('i').style.color = '#fb6340';
+                                    });
+                                    
+                                    const realCheckbox = document.querySelector('input[name="is_staff"]');
+                                    const hint = document.getElementById('role-hint');
+                                    const selectedContent = document.querySelector('#role_' + role).nextElementSibling;
+                                    
+                                    // Bật sáng mục được chọn
+                                    selectedContent.style.borderColor = '#5e72e4';
+                                    selectedContent.style.background = '#f0f2ff';
+                                    selectedContent.querySelector('div').style.color = '#5e72e4';
+                                    selectedContent.querySelector('i').style.color = '#5e72e4';
+
+                                    // Check/Uncheck logic
+                                    if(role === 'admin') {
+                                        if(realCheckbox) realCheckbox.checked = true;
+                                        hint.innerHTML = '<i class="fa-solid fa-shield-halved"></i> <b>Quản trị viên:</b> Có toàn quyền xem Dashboard, Bản đồ GIS và Quản lý kho.';
+                                        hint.style.background = '#fef2f2'; hint.style.color = '#e11d48';
+                                    } else if (role === 'partner') {
+                                        if(realCheckbox) realCheckbox.checked = false;
+                                        hint.innerHTML = '<i class="fa-solid fa-circle-info"></i> <b>Đối tác B2B:</b> Mặc định dùng cho Shopee, TikTok... để tạo đơn.';
+                                        hint.style.background = '#e0f2fe'; hint.style.color = '#0284c7';
+                                    } else {
+                                        if(realCheckbox) realCheckbox.checked = false;
+                                        hint.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> <b>Tài xế:</b> Tạo xong, bạn <u>phải sang mục Quản lý Tài xế</u> để gắn biển số xe vào tài khoản này.';
+                                        hint.style.background = '#fef9c3'; hint.style.color = '#ca8a04';
+                                    }
+                                }
+                            </script>
+
+                        {% else %}
+                            <div class="django-field">
+                                <label class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <span class="helptext">
+                                        {% if field.name == 'username' %}
+                                            Bắt buộc. Tối đa 150 ký tự. Chỉ bao gồm chữ cái, chữ số và các ký tự @/./+/-/_
+                                        {% else %}
+                                            {{ field.help_text|safe }}
+                                        {% endif %}
+                                    </span>
+                                {% endif %}
+                                {% if field.errors %}
+                                    <span style="color: #f5365c; font-size: 13px; margin-top: 8px; display: block; font-weight: 500;">
+                                        <i class="fa-solid fa-circle-exclamation"></i> {{ field.errors.0 }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                        {% endif %}
                     {% endfor %}
                 </div>
 

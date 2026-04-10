@@ -152,61 +152,65 @@
         <div id="map"></div>
     </div>
 
-    <div class="info-section">
+   <div class="info-section">
+    
+    <div class="info-card">
+        <div class="order-header">
+            <div>
+                <h4 style="margin:0; font-size:13px; color:#94a3b8; text-transform:uppercase; font-weight:600; margin-bottom:5px;">Mã Vận Đơn</h4>
+                <h2>#{{ dh.ma_don }}</h2>
+            </div>
+            <span class="order-badge" id="badge-{{ dh.ma_don }}">{{ dh.trang_thai }}</span>
+        </div>
         
-        <div class="info-card">
-            <div class="order-header">
-                <div>
-                    <h4 style="margin:0; font-size:13px; color:#94a3b8; text-transform:uppercase; font-weight:600; margin-bottom:5px;">Mã Vận Đơn</h4>
-                    <h2>#{{ dh.ma_don }}</h2>
-                </div>
-                <span class="order-badge" id="badge-{{ dh.ma_don }}">{{ dh.trang_thai }}</span>
+        <div class="route-info">
+            <div class="route-point point-start">
+                <small>Điểm xuất phát</small>
+                <div class="loc-title">{{ dh.kho_xuat_phat.ten_kho }}</div>
+                <div class="loc-detail"><i class="fa-solid fa-warehouse"></i> {{ dh.kho_xuat_phat.dia_chi }}</div>
             </div>
             
-            <div class="route-info">
-                <div class="route-point point-start">
-                    <small>Điểm xuất phát</small>
-                    <div class="loc-title">Kho Trung Tâm LogisticsPro</div>
-                    <div class="loc-detail"><i class="fa-solid fa-warehouse"></i> Tổng kho Phân phối Quận 1, TP. Hồ Chí Minh</div>
-                </div>
-                
-                <div class="route-point point-end">
-                    <small>Điểm giao hàng</small>
-                    <div class="loc-title">{{ dh.ten_nguoi_nhan }}</div>
-                    <div class="loc-detail"><i class="fa-solid fa-location-dot"></i> <span>{{ dh.dia_chi_nguoi_nhan }}</span></div>
-                    <div class="loc-detail"><i class="fa-solid fa-phone"></i> <span style="font-family: monospace; font-size: 14px; font-weight: 600;">{{ dh.sdt_nguoi_nhan }}</span></div>
-                </div>
+            <div class="route-point point-end">
+                <small>Điểm giao hàng</small>
+                <div class="loc-title">{{ dh.ten_nguoi_nhan }}</div>
+                <div class="loc-detail"><i class="fa-solid fa-location-dot"></i> {{ dh.dia_chi_nguoi_nhan }}</div>
             </div>
         </div>
-
-        <div class="info-card">
-            <h4 style="margin-top: 0; margin-bottom: 20px; color: #1e293b; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px;">
-                <i class="fa-solid fa-wallet" style="color: #2dce89;"></i> Phí vận chuyển ước tính
-            </h4>
-            
-            <div class="price-box">
-                <div class="price-row">
-                    <span>Khoảng cách di chuyển:</span>
-                    <strong id="distance"><i class="fa-solid fa-spinner fa-spin"></i> Đang tính...</strong>
-                </div>
-                <div class="price-row">
-                    <span>Thời gian giao (Dự kiến):</span>
-                    <strong id="duration"><i class="fa-solid fa-spinner fa-spin"></i> Đang tính...</strong>
-                </div>
-                
-                <div class="total-divider"></div>
-                
-                <div class="total-title">Tổng cước phí thu hộ (COD)</div>
-                <div class="total-price" id="shipping-fee">0 đ</div>
-            </div>
-        </div>
-
-        <a href="{% url 'core:home' %}" class="btn-back">
-            <i class="fa-solid fa-arrow-left"></i> Trở về Trang chủ
-        </a>
     </div>
-</div>
 
+    <div class="info-card">
+        <h4 style="margin-top: 0; margin-bottom: 20px; color: #1e293b; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-clock-rotate-left" style="color: #5e72e4;"></i> Nhật ký luân chuyển
+        </h4>
+        <div class="timeline" style="border-left: 2px dashed #e2e8f0; padding-left: 20px; position: relative; margin-left: 10px;">
+            {% for log in lich_su %}
+            <div class="timeline-item" style="margin-bottom: 20px; position: relative;">
+                <div style="position: absolute; left: -27px; top: 5px; width: 12px; height: 12px; border-radius: 50%; background: #5e72e4; border: 2px solid white; box-shadow: 0 0 5px rgba(94,114,228,0.3);"></div>
+                <div style="font-size: 11px; color: #94a3b8; font-weight: 700;">{{ log.thoi_gian|date:"H:i - d/m/Y" }}</div>
+                <div style="font-weight: 700; color: #1e293b; font-size: 14px;">{{ log.get_trang_thai_buoc_display }}</div>
+                <div style="font-size: 13px; color: #64748b;"><i class="fa-solid fa-warehouse"></i> {{ log.kho.ten_kho }}</div>
+            </div>
+            {% empty %}
+            <p style="color: #94a3b8; font-size: 13px; text-align: center;">Chưa có dữ liệu nhật ký.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="info-card">
+        <h4 style="margin-top: 0; margin-bottom: 20px; color: #1e293b; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-wallet" style="color: #2dce89;"></i> Phí vận chuyển ước tính
+        </h4>
+        <div class="price-box">
+            <div class="price-row"><span>Khoảng cách:</span> <strong id="distance">Đang tính...</strong></div>
+            <div class="price-row"><span>Thời gian:</span> <strong id="duration">Đang tính...</strong></div>
+            <div class="total-divider"></div>
+            <div class="total-title">Tổng cước phí thu hộ (COD)</div>
+            <div class="total-price" id="shipping-fee">0 đ</div>
+        </div>
+    </div>
+
+    <a href="{% url 'core:home' %}" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Trở về Trang chủ</a>
+</div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
 
