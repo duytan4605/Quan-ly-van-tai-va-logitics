@@ -719,14 +719,14 @@ body, input, select, textarea, button, .nav-link, .nav-brand, .page-title {
 
 <footer class="main-footer">
     <div class="footer-container">
-        <div class="footer-col">
-           <h4>Hỗ trợ đối tác</h4>
+       <div class="footer-col">
+            <h4>Hỗ trợ đối tác</h4>
             <ul>
                 <li><a href="{% url 'core:home' %}">Trung Tâm Trợ Giúp</a></li>
                 <li><a href="{% url 'core:ban_do_chung' %}">Bản Đồ Vận Tải</a></li>
-                <li><a href="#" onclick="thongBaoDemo(event)">Quy Trình Đối Soát</a></li>
-                <li><a href="#" onclick="thongBaoDemo(event)">Khiếu Nại Hàng Hóa</a></li>
-                <li><a href="#" onclick="thongBaoDemo(event)">Câu Hỏi Thường Gặp</a></li>
+                <li><a href="javascript:void(0)" title="Vui lòng liên hệ Hotline: 1900 xxxx">Quy Trình Đối Soát</a></li>
+                <li><a href="javascript:void(0)" title="Gửi email về: support@logisticspro.vn">Khiếu Nại Hàng Hóa</a></li>
+                <li><a href="javascript:void(0)" title="Tính năng đang cập nhật">Câu Hỏi Thường Gặp</a></li>
             </ul>
         </div>
 
@@ -737,7 +737,7 @@ body, input, select, textarea, button, .nav-link, .nav-brand, .page-title {
                 <li><a href="{% url 'core:quan_ly_kho' %}">Mạng Lưới Kho Bãi</a></li>
                 <li><a href="{% url 'core:quan_ly_tai_xe' %}">Đội Ngũ Tài Xế</a></li>
                 <li><a href="{% url 'core:toi_uu' %}">Công Nghệ Tối Ưu</a></li>
-                <li><a href="{% url 'core:quan_ly_tai_khoan' %}">Chính Sách Bảo Mật</a></li>
+                <li><a href="javascript:void(0)" title="Vui lòng xem trong hợp đồng hợp tác">Chính Sách Bảo Mật</a></li>
             </ul>
         </div>
 
@@ -842,13 +842,7 @@ body, input, select, textarea, button, .nav-link, .nav-brand, .page-title {
             });
     }
 
-    // Cứ 10 giây tự kiểm tra 1 lần để demo cho mượt
-    setInterval(refreshNotifications, 10000);
-    refreshNotifications(); // Chạy luôn khi vừa load trang
-function thongBaoDemo(e) {
-            e.preventDefault(); // Lệnh này cực quan trọng: Ngăn không cho web bị giật lên đầu trang
-            alert("🚀 Chức năng này đang được nâng cấp và sẽ ra mắt ở phiên bản tiếp theo!");
-        }
+    
     </script>
 </body>
 </html>
