@@ -4,8 +4,9 @@
 {% block content %}
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- ĐÂY, THIẾU DÒNG NÀY NÈ -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
 <style>
     body { font-family: 'Poppins', sans-serif; background-color: #f4f6f9; margin: 0; overflow: hidden; } /* Tắt cuộn trang tổng để fix cứng map */
     
@@ -128,6 +129,10 @@
                 <option value="Xe tải">🚚 Chỉ hiện Xe tải</option>
                 <option value="Xe bán tải">🛻 Chỉ hiện Xe bán tải</option>
             </select>
+            <!-- Dán dưới cái <select class="filter-select"...> -->
+<button onclick="veDuongTuShipper()" class="btn-detail" style="margin-top: 15px; width: 100%; background: linear-gradient(135deg, #11cdef, #1171ef);">
+    <i class="fa-solid fa-route"></i> Định vị Shipper & Nối Tuyến
+</button>
         </div>
 
         <div class="vehicle-list-container">
@@ -166,9 +171,10 @@
     </div>
 </div>
 
+<!-- ĐÂY, THIẾU CÁI GỐC NÀY NÈ -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
 <script>
-    // 1. Khởi tạo bản đồ
     var map = L.map('map', {zoomControl: false}).setView([10.7769, 106.7009], 13);
     L.control.zoom({ position: 'topright' }).addTo(map);
 
@@ -262,6 +268,69 @@
                 }
             });
         }
+    }
+</script>
+<script>
+    // Hàm lấy GPS và nối đường đi qua các đơn
+    function veDuongTuShipper() {
+        if (!navigator.geolocation) {
+            alert("Trình duyệt không hỗ trợ GPS.");
+            return;
+        }
+
+        alert("📍 Đang lấy tọa độ hiện tại của bạn làm vị trí Shipper...");
+
+        navigator.geolocation.getCurrentPosition(function(pos) {
+            var myLat = pos.coords.latitude;
+            var myLng = pos.coords.longitude;
+
+            // 1. Xóa đường dẫn cũ nếu đã từng vẽ
+            if (window.routeControl) {
+                map.removeControl(window.routeControl);
+            }
+
+            // 2. Tạo icon xe máy to đùng cho Shipper
+            var shipperIcon = L.divIcon({
+                className: '',
+                html: '<div style="font-size:35px; filter: drop-shadow(0px 5px 5px rgba(0,0,0,0.4)); animation: pulse 1s infinite;">🛵</div>',
+                iconSize: [35, 35],
+                iconAnchor: [17, 35]
+            });
+
+            // 3. Cắm cờ Shipper lên bản đồ
+            L.marker([myLat, myLng], {icon: shipperIcon})
+                .addTo(map)
+                .bindPopup("<b style='color:#5e72e4;'>Vị trí của bạn (Shipper)</b>")
+                .openPopup();
+
+            // 4. Gom tọa độ: [Shipper -> Đơn 1 -> Đơn 2 ...]
+            var waypoints = [ L.latLng(myLat, myLng) ];
+
+            // Lấy tối đa 5 đơn (để API vẽ đường không bị quá tải)
+            var routeMarkers = markers.slice(0, 5); 
+            routeMarkers.forEach(function(item) {
+                waypoints.push(L.latLng(item.lat, item.lng));
+            });
+
+            // 5. Ra lệnh vẽ đường nối tất cả các điểm
+            window.routeControl = L.Routing.control({
+                waypoints: waypoints,
+                routeWhileDragging: false,
+                addWaypoints: false, // Không cho kéo thả sửa đường linh tinh
+                fitSelectedRoutes: true, // Tự động zoom bản đồ cho vừa khít toàn bộ đường đi
+                lineOptions: {
+                    styles: [{color: '#5e72e4', opacity: 0.8, weight: 6, dashArray: '10, 10'}] // Đường đứt nét màu xanh tím
+                },
+                createMarker: function() { return null; }, // Không vẽ đè marker mặc định của API
+                show: false // Ẩn cái bảng text chỉ dẫn (rẽ trái/phải) cho gọn màn hình
+            }).addTo(map);
+
+            // Zoom về chỗ Shipper đang đứng
+            map.setView([myLat, myLng], 14);
+
+        }, function(err) {
+            alert("Lỗi định vị! Hãy bật GPS trên thiết bị.");
+        }, { enableHighAccuracy: true });
     }
 </script>
 {% endblock %}

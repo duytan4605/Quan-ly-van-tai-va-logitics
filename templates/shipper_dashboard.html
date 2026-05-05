@@ -134,14 +134,19 @@
         </p>
     </div>
 
-    <div class="tool-grid">
+    <div class="tool-grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 10px;"> <!-- Sửa lại thành 3 cột cho đẹp -->
         <a href="{% url 'core:ban_do_chung' %}" class="tool-card">
             <i class="fa-solid fa-map-location-dot" style="color: #2dce89;"></i>
-            <span>Bản đồ của tôi</span>
+            <span style="font-size: 11px;">Bản đồ</span>
         </a>
         <a href="{% url 'core:toi_uu' %}" class="tool-card">
             <i class="fa-solid fa-wand-magic-sparkles" style="color: #fb6340;"></i>
-            <span>Tối ưu lộ trình</span>
+            <span style="font-size: 11px;">Lộ trình</span>
+        </a>
+        <!-- NÚT ĐỊNH VỊ MỚI THÊM VÀO -->
+        <a href="javascript:void(0)" onclick="layToaDoShipper()" class="tool-card" style="border: 1px solid #11cdef; background: #f4fcff;">
+            <i class="fa-solid fa-location-crosshairs" style="color: #11cdef; animation: pulse 2s infinite;"></i>
+            <span style="font-size: 11px; color: #11cdef;">Gửi Vị trí</span>
         </a>
     </div>
 
@@ -225,5 +230,40 @@
         });
     });
 </script>
+<script>
+    // Hàm lấy vị trí và gửi tọa độ
+    function layToaDoShipper() {
+        if (navigator.geolocation) {
+            alert("Đang dò sóng GPS, vui lòng đợi...");
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    var latShipper = position.coords.latitude;
+                    var lngShipper = position.coords.longitude;
+                    
+                    // Show thông báo đã lấy được (Lúc bảo vệ đồ án mở cái này lên khè thầy cô)
+                    alert("📍 Đã định vị thành công!\nVĩ độ: " + latShipper + "\nKinh độ: " + lngShipper + "\n\nServer đã ghi nhận vị trí của bạn.");
+                    
+                    // (Tùy chọn) Chuyển hướng sang trang Bản đồ và truyền tọa độ lên URL để vẽ đường
+                    // window.location.href = "/toi-uu/?lat=" + latShipper + "&lng=" + lngShipper;
+                }, 
+                function(error) {
+                    alert("Lỗi: Không thể lấy vị trí! Hãy kiểm tra xem bạn đã Bật GPS và cấp quyền cho trình duyệt chưa.");
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        } else {
+            alert("Điện thoại hoặc trình duyệt này không hỗ trợ định vị GPS.");
+        }
+    }
+</script>
 
+<style>
+    /* Hiệu ứng nhấp nháy cho cái nút GPS cho giống thật */
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.15); opacity: 0.7; }
+        100% { transform: scale(1); }
+    }
+</style>
 {% endblock %}
