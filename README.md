@@ -115,9 +115,6 @@ Mọi đóng góp đều được hoan nghênh:
 4. Push branch (`git push origin feature/ten-tinh-nang`)
 5. Tạo Pull Request
 
-## 📄 Giấy phép
-
-Dự án hiện chưa có giấy phép cụ thể. Nếu muốn công khai điều khoản sử dụng, hãy thêm file `LICENSE` phù hợp (MIT, Apache 2.0, ...).
 
 ## 👤 Tác giả
 
